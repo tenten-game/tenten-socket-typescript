@@ -1,8 +1,8 @@
 import { Socket, Server as SocketServer } from "socket.io";
 import { EventLobbyStartGameRequest } from "../../application/event/dto/event.lobby.dto";
 import { handleLobbyUserCountGet, handleLobbyUserListGet } from "../../application/event/event.lobby.service";
-import { UserCount } from "../../repository/common/user.repository";
 import { getSocketDataRoomNumber } from "../../repository/socket/socket.repository";
+import { UserCount } from "../../repository/common/entity/userCount.dto";
 
 export function onLobbyStartGame(
   _socketServer: SocketServer,
@@ -19,7 +19,7 @@ export function onLobbyUserCountGet(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('event.lobby.userCount.get', async (req: any): Promise<void> => {
+  socket.on('event.lobby.userCount.get', async (): Promise<void> => {
     const roomNumber: string = getSocketDataRoomNumber(socket);
     const userCount: UserCount = await handleLobbyUserCountGet(roomNumber);
     socket.emit('event.lobby.userCount.got', JSON.stringify(userCount));
@@ -30,7 +30,7 @@ export function onLobbyUserListGet(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('event.lobby.userList.get', async (req: any): Promise<void> => {
+  socket.on('event.lobby.userList.get', async (): Promise<void> => {
     const roomNumber = getSocketDataRoomNumber(socket);
     const users = await handleLobbyUserListGet(roomNumber);
     socket.emit('event.lobby.userList.got', JSON.stringify(users));

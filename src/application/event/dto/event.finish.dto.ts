@@ -1,18 +1,25 @@
-export default class EventFinishScoreGetRequest {
+export class EventFinishScoreGetRequest {
     constructor(
         public match: string,
     ) { }
 }
 
-export interface EventFinishScorePostRequest {
-    score: number;
-    match: string;
+export class EventFinishScorePostRequest {
+    constructor(
+        public score: number,
+        public match: string,
+    ) { }
 }
 
-export interface EventFinishRankingGetResponse {
-    ranking: number;
+export class EventFinishRankingGetResponse {
+    constructor(
+        public match: string,
+        public ranking: number[],
+    ) { }
 }
 
-export interface EventFinishRankingGetRequest {
-    match: string;
+export class EventFinishRankingGetRequest {
+    constructor(
+        public match: string,
+    ) { }
 }

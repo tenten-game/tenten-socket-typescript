@@ -1,5 +1,5 @@
 import { Socket, Server as SocketServer } from 'socket.io';
-import EventFinishScoreGetRequest, { EventFinishRankingGetRequest, EventFinishScorePostRequest } from '../../application/event/dto/event.finish.dto';
+import { EventFinishRankingGetRequest, EventFinishScoreGetRequest, EventFinishScorePostRequest } from '../../application/event/dto/event.finish.dto';
 import { handleEventFinishRankingGet, handleEventFinishScoreGet, handleEventFinishScorePost } from '../../application/event/event.finish.service';
 import { ProcessRankingsResult } from '../../repository/event/entity/rankings.entity';
 import { getSocketDataRoomNumber, getSocketDataUser } from '../../repository/socket/socket.repository';
@@ -12,16 +12,9 @@ export function onEventFinishScoreGet(
     const request: EventFinishScoreGetRequest = typeof req === 'string' ? JSON.parse(req) : req;
     const roomNumber: string = getSocketDataRoomNumber(socket);
     const rankings: ProcessRankingsResult = await handleEventFinishScoreGet(roomNumber, request.match);
-
     socket.emit('event.finish.score.got', JSON.stringify(rankings)); // 웹에게 전체 점수
-    _socketServer.to(roomNumber).emit('event.finish.score.got', JSON.stringify({
-      winTeamId: rankings.winTeamId,
-      teamScore: rankings.teamScore,
-      teamTopRankings: rankings.teamTopRankings,
-      teamBottomRankings: rankings.teamBottomRankings,
-      totalTopRankings: rankings.totalTopRankings,
-      totalBottomRankings: rankings.totalBottomRankings,
-    })); // 앱에게 핵심 점수
+    rankings.totalRankings = [];
+    _socketServer.to(roomNumber).emit('event.finish.score.got', JSON.stringify(rankings)); // 앱에게 핵심 점수
   });
 }
 

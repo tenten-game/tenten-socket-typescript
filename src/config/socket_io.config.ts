@@ -80,7 +80,6 @@ export function initializeSocket(socketServer: SocketServer): void {
     /**
      * EVENT
      */
-
     // ROOM - HOST
     onEventRoomCreate(socketServer, socket);
     onEventRoomChangeMode(socketServer, socket);

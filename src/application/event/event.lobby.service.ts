@@ -1,7 +1,8 @@
 import { Room } from "../../common/entity/room.entity";
 import { User } from "../../common/entity/user.entity";
+import { UserCount } from "../../repository/common/entity/userCount.dto";
 import { getRoom } from "../../repository/common/room.repository";
-import { getUserCount, getUserList, UserCount } from "../../repository/common/user.repository";
+import { getUserCount, getUserList } from "../../repository/common/user.repository";
 
 export async function handleLobbyUserCountGet(roomNumber: string): Promise<UserCount> {
     const room: Room = await getRoom(roomNumber);

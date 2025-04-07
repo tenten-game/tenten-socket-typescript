@@ -1,5 +1,6 @@
 import { User } from "../../common/entity/user.entity";
 import { redisClient } from "../../config/redis.config";
+import { TeamUserCount, UserCount } from "./entity/userCount.dto";
 
 export async function getRoomUserMap(
     roomNumber: string,
@@ -60,9 +61,6 @@ export async function getUserCount(
         teamUserCount[teamId] = count;
     }
 
-    console.log(`totalUserCount: ${totalUserCount}`);
-    console.log(`teamUserCount: ${JSON.stringify(teamUserCount)}`);
-
     return new UserCount(
         totalUserCount,
         Object.entries(teamUserCount).map(([teamId, count]) => new TeamUserCount(parseInt(teamId), count)),
@@ -82,17 +80,6 @@ export async function getUserList(
         }
     }
     return userMap;
-}
-
-export class TeamUserCount {
-    constructor(public teamId: number, public count: number) { }
-}
-
-export class UserCount {
-    constructor(
-        public totalUserCount: number,
-        public teamUserCount: TeamUserCount[],
-    ) { }
 }
 
 function generateKey(roomNumber: string): string {
