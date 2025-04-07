@@ -13,8 +13,8 @@ export function handleRoomEnter(room: RoomNumberRequest, user: User): void {
 }
 
 export async function handleRoomChangeMode(
-    request: RoomChangeModeRequest, 
-    roomNumber:string, 
+    request: RoomChangeModeRequest,
+    roomNumber: string,
     userId: number
 ): Promise<void> {
     const room = await getRoom(roomNumber);

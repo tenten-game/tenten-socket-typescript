@@ -1,8 +1,8 @@
-import express, { Application } from "express";
-import cors from "cors";
-import os from "os";
 import cluster from "cluster";
+import cors from "cors";
+import express, { Application } from "express";
 import { Worker } from "node:cluster";
+import os from "os";
 import { logger } from "../util/logger";
 
 export function installPrimaryCluster(): void {

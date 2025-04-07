@@ -33,7 +33,7 @@ export function installHttps(app: Application): HttpServer {
 }
 
 function handleHttpLocal(app: Application): HttpServer {
-   {
+  {
     const http: HttpServer = require('http').createServer(app);
     http.listen(port, (): void => {
       const address: AddressInfo = http.address() as AddressInfo;

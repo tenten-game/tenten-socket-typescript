@@ -1,6 +1,7 @@
 import { instrument } from '@socket.io/admin-ui';
 import { Server as HttpServer } from "http";
 import { Socket, Server as SocketServer } from 'socket.io';
+import { onDisconnect, onDisconnecting } from '../presentation/common/connection.controller';
 import { onEventInGameRealTimeScoreGet, onEventInGameRealTimeScorePost } from '../presentation/event/event.ingame.controller';
 import { onLobbyResetUserList, onLobbyStartGame, onLobbyUserCountGet, onLobbyUserListGet } from '../presentation/event/event.lobby.controller';
 import { onEventRoomChangeMode, onEventRoomCreate, onEventRoomEnter } from '../presentation/event/event.room.controller';
@@ -9,8 +10,6 @@ import { onRoomChangeMode, onRoomCreate, onRoomEnter, onRoomExit } from '../pres
 import { logger } from '../util/logger';
 import { config } from './env.config';
 import { redisAdapter } from "./redis.config";
-import { onDisconnecting, onDisconnect } from '../presentation/common/connection.controller';
-import { processRankings } from '../repository/event/event.ranking.repository';
 
 export function installSocketIo(https: HttpServer): SocketServer {
 
@@ -107,7 +106,5 @@ export function initializeSocket(socketServer: SocketServer): void {
     onEventFinishRankingGet(socketServer, socket);
 
   });
-
-  processRankings("12345678", "MC000000", [2, 3]);
 
 }

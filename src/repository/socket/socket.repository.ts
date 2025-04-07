@@ -1,6 +1,6 @@
 import { Socket } from "socket.io";
 import { User } from "../../common/entity/user.entity";
-import { EventHostSocketData, SocketData } from "../entity/socket.entity";
+import { EventHostSocketData, SocketData } from "./entity/socket.entity";
 
 export function setSocketDataUser(
   socket: Socket,

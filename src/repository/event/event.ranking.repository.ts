@@ -1,17 +1,91 @@
 import { User } from '../../common/entity/user.entity';
 import { redisClient } from '../../config/redis.config';
+import { ProcessRankingsResult, Ranking, RankingDTO, TeamScore, TOP_N } from './entity/rankings.entity';
 
-interface Ranking {
-    i: number;
-    a: number;
-    f: number;
-    t: number;
-    n: string;
-    score?: number; // redisClientClient에서 가져온 score 추가
-}
+export async function processRankings(
+    roomNumber: string,
+    match: string,
+    teamIds: number[],
+): Promise<ProcessRankingsResult> {
+    const rankingKey = generateKey(roomNumber, match);
+    const calculatedKey = rankingKey + '_CALCULATED';
+    const allRankings = await getAllRankings(rankingKey);
+    const overallRankings = assignRanks(allRankings);
 
-function generateKey(roomNumber: string, match: string): string {
-    return `${roomNumber}_${match}_RANKING`;
+    overallRankings.forEach(ranking => {
+        redisClient.zadd(
+            calculatedKey,
+            ranking.rank || 9999,
+            JSON.stringify(new User(ranking.i, ranking.a, ranking.f, ranking.t, ranking.n))
+        );
+    });
+
+    const totalRankings: RankingDTO[] = overallRankings.map(r => ({
+        r: r.rank as number,
+        s: r.score as number,
+        u: r.i,
+        a: r.a,
+        f: r.f,
+        n: r.n,
+        t: r.t,
+    }));
+
+    const teamScore: TeamScore[] = [];
+    const teamTopRankings: { [teamId: number]: RankingDTO[] } = {};
+    const teamBottomRankings: { [teamId: number]: RankingDTO[] } = {};
+
+    for (const teamId of teamIds) {
+        const teamRankings = overallRankings.filter(r => r.t === teamId);
+        const totalScore = teamRankings.reduce((sum, r) => sum + (r.score || 0), 0);
+        const averageScore = teamRankings.length > 0 ? totalScore / teamRankings.length : 0;
+        teamScore.push({ id: teamId, totalScore, averageScore });
+
+        const sortedTeamRankings = teamRankings.sort((a, b) => (a.rank as number) - (b.rank as number));
+        teamTopRankings[teamId] = sortedTeamRankings
+            .slice(0, TOP_N)
+            .map(r => ({
+                r: r.rank as number,
+                s: r.score as number,
+                u: r.i,
+                a: r.a,
+                f: r.f,
+                n: r.n,
+                t: r.t,
+            }));
+        teamBottomRankings[teamId] = sortedTeamRankings
+            .slice(-TOP_N)
+            .map(r => ({
+                r: r.rank as number,
+                s: r.score as number,
+                u: r.i,
+                a: r.a,
+                f: r.f,
+                n: r.n,
+                t: r.t,
+            }));
+    }
+
+    let winTeamId = teamIds[0];
+    let maxAverageScore = -Infinity;
+    for (const ts of teamScore) {
+        if (ts.averageScore > maxAverageScore) {
+            maxAverageScore = ts.totalScore;
+            winTeamId = ts.id;
+        }
+    }
+
+    const totalTopRankings = totalRankings.slice(0, TOP_N);
+    const totalBottomRankings = totalRankings.slice(-TOP_N);
+
+    return {
+        winTeamId,
+        teamScore,
+        totalRankings,
+        teamTopRankings,
+        teamBottomRankings,
+        totalTopRankings,
+        totalBottomRankings,
+    };
 }
 
 async function getAllRankings(rankingKey: string): Promise<Ranking[]> {
@@ -39,31 +113,6 @@ function assignRanks(rankings: Ranking[]): (Ranking & { rank: number })[] {
     });
 }
 
-export async function processRankings(roomNumber: string, match: string, teamIds: number[]): Promise<any> {
-    const allRankings = await getAllRankings(generateKey(roomNumber, match));
-    const overallRankings = assignRanks(allRankings);
-
-    overallRankings.forEach((ranking, _) => {
-        redisClient.zadd(
-            generateKey(roomNumber, match) + '_CALCULATED', 
-            ranking.rank || 999, 
-            JSON.stringify(new User(ranking.i, ranking.a, ranking.f, ranking.t, ranking.n))
-        );
-    });
-    
-    const teamRankingList: (Ranking & { rank: number })[][] = [];
-
-    for (const teamId of teamIds) {
-        const teamRanking = assignRanks(allRankings.filter(r => r.t === teamId));
-        teamRankingList.push(teamRanking);
-    }
-
-    return {
-        overall: overallRankings,
-        teamRankingList: teamRankingList,
-    };
-}
-
 export function zaddScore(
     roomNumber: string,
     score: number,
@@ -80,6 +129,10 @@ export async function zRevRank(
     user: User,
 ): Promise<number> {
     const rankingKey = generateKey(roomNumber, match) + "_CALCULATED";
-    const ranking: string = await redisClient.zscore(rankingKey, JSON.stringify(user)) || "999";
+    const ranking: string = (await redisClient.zscore(rankingKey, JSON.stringify(user))) || "999";
     return parseInt(ranking);
+}
+
+function generateKey(roomNumber: string, match: string): string {
+    return `${roomNumber}_${match}_RANKING`;
 }

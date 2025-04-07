@@ -1,9 +1,8 @@
 import { Room } from "../../common/entity/room.entity";
 import { RoomMode } from "../../common/enums/enums";
 import { getRoom, setRoom } from "../../repository/common/room.repository";
-import { setRoomUser } from "../../repository/common/user.repository";
-import { addRoomTeamUserCount } from "../../repository/event/event.teamUserCount.repository";
-import { EventRoomCreateRequest, EventRoomChangeModeRequest, EventRoomEnterRequest } from "./dto/event.room.dto";
+import { addUser } from "../../repository/common/user.repository";
+import { EventRoomChangeModeRequest, EventRoomCreateRequest, EventRoomEnterRequest } from "./dto/event.room.dto";
 
 export function handleEventRoomCreate(request: EventRoomCreateRequest, hostSocketId: string): void {
     setRoom(request.roomNumber, new Room(
@@ -22,8 +21,7 @@ export async function handleEventRoomChangeMode(request: EventRoomChangeModeRequ
 }
 
 export async function handleEventRoomEnterAndGetHostSocketId(request: EventRoomEnterRequest): Promise<string> {
-    setRoomUser(request.roomNumber, request.user);
-    await addRoomTeamUserCount(request.roomNumber, request.user.t);
+    addUser(request.roomNumber, request.user);
     const room: Room = await getRoom(request.roomNumber);
     return room.hostSocketId
 }

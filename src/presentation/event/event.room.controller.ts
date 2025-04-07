@@ -4,8 +4,8 @@ import { handleEventRoomChangeMode, handleEventRoomCreate, handleEventRoomEnterA
 import { getEventHostSocketDataRoomNumber, setSocketDataRoomNumber, setSocketDataUser } from '../../repository/socket/socket.repository';
 
 export function onEventRoomCreate(
-    _socketServer: SocketServer,
-    socket: Socket
+  _socketServer: SocketServer,
+  socket: Socket
 ): void {
   socket.on('event.room.create', async (req: any): Promise<void> => {
     const request: EventRoomCreateRequest = typeof req === 'string' ? JSON.parse(req) : req;
@@ -16,8 +16,8 @@ export function onEventRoomCreate(
 }
 
 export function onEventRoomChangeMode(
-    _socketServer: SocketServer,
-    socket: Socket
+  _socketServer: SocketServer,
+  socket: Socket
 ): void {
   socket.on('event.room.changeMode', async (req: any): Promise<void> => {
     const request: EventRoomChangeModeRequest = typeof req === 'string' ? JSON.parse(req) : req;
@@ -28,8 +28,8 @@ export function onEventRoomChangeMode(
 }
 
 export function onEventRoomEnter(
-    _socketServer: SocketServer,
-    socket: Socket
+  _socketServer: SocketServer,
+  socket: Socket
 ): void {
   socket.on('event.room.enter', async (req: any): Promise<void> => {
     const request: EventRoomEnterRequest = typeof req === 'string' ? JSON.parse(req) : req;

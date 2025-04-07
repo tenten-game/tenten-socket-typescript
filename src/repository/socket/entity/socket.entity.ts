@@ -1,4 +1,4 @@
-import { User } from "../../common/entity/user.entity";
+import { User } from "../../../common/entity/user.entity";
 
 export class SocketData {
     user: User;

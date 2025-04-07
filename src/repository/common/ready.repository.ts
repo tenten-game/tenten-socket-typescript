@@ -1,4 +1,4 @@
-import { redisClient } from "../../config/redis.config"
+import { redisClient } from "../../config/redis.config";
 
 export function addReady(roomNumber: string, userId: string): void {
     redisClient.sadd(generateRoomKey(roomNumber), userId);

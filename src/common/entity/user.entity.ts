@@ -4,7 +4,7 @@ export class User {
     f: number;
     t: number;
     n: string;
-    
+
     constructor(i: number, a: number, f: number, t: number, n: string) {
         this.i = i;
         this.a = a;

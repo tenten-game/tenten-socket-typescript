@@ -40,12 +40,11 @@ export async function deleteRoomUser(
 export async function addUser(
     roomNumber: string,
     user: User,
-    teamId: number,
 ): Promise<void> {
     redisClient.zadd(
         generateKey(roomNumber),
+        user.t,
         JSON.stringify(user),
-        teamId,
     )
 }
 
@@ -56,29 +55,47 @@ export async function getUserCount(
     const totalUserCount: number = await redisClient.zcard(generateKey(roomNumber));
     const teamUserCount: Record<number, number> = {};
 
-    for(const teamId of teamIds) {
+    for (const teamId of teamIds) {
         const count: number = await redisClient.zcount(generateKey(roomNumber), teamId, teamId);
         teamUserCount[teamId] = count;
     }
 
+    console.log(`totalUserCount: ${totalUserCount}`);
+    console.log(`teamUserCount: ${JSON.stringify(teamUserCount)}`);
+
     return new UserCount(
         totalUserCount,
         Object.entries(teamUserCount).map(([teamId, count]) => new TeamUserCount(parseInt(teamId), count)),
-    )    
+    )
+}
+
+export async function getUserList(
+    roomNumber: string,
+): Promise<Record<number, User>> {
+    const userStringList: string[] = await redisClient.zrange(generateKey(roomNumber), 0, -1);
+    const userMap: Record<number, User> = {};
+
+    for (let i = 0; i < userStringList.length; i++) {
+        const user: User = JSON.parse(userStringList[i]);
+        if (!userMap[user.i]) {
+            userMap[user.i] = user;
+        }
+    }
+    return userMap;
 }
 
 export class TeamUserCount {
-    constructor(public teamId: number, public count: number) {}
+    constructor(public teamId: number, public count: number) { }
 }
 
 export class UserCount {
     constructor(
         public totalUserCount: number,
         public teamUserCount: TeamUserCount[],
-    ) {}
+    ) { }
 }
 
 function generateKey(roomNumber: string): string {
-    return `${roomNumber}_U`;
+    return `${roomNumber}_USERLIST`;
 }
 
