@@ -49,7 +49,7 @@ export function installSocketIo(https: HttpServer): SocketServer {
 
 export function initializeSocket(socketServer: SocketServer): void {
   socketServer.on('connection', async (socket: Socket): Promise<void> => {
-    if (config.env === 'development') socket.onAny((event, ...args) => { logger.info('RECEIVED DATA ', event, ': ', args); });
+    if (config.env === 'development') socket.onAny((event, ...args) => logger.debug(`Socket Event: ${event}, Args: ${JSON.stringify(args)}`));
 
     // NORMAL APP
     // CONNECTION
