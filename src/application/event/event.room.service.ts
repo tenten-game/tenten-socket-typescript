@@ -5,13 +5,15 @@ import { addUser } from "../../repository/common/user.repository";
 import { EventRoomChangeModeRequest, EventRoomCreateRequest, EventRoomEnterRequest } from "./dto/event.room.dto";
 
 export function handleEventRoomCreate(request: EventRoomCreateRequest, hostSocketId: string): void {
-    setRoom(request.roomNumber, new Room(
+    const room = new Room(
         hostSocketId,
         0,
         0,
         RoomMode.TEAM,
-        request.event
-    ));
+        request.event,
+    );
+    room.event!.isHostConnected = true;
+    setRoom(request.roomNumber, room);
 }
 
 export async function handleEventRoomChangeMode(request: EventRoomChangeModeRequest, roomNumber: string): Promise<void> {

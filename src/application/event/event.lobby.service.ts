@@ -12,7 +12,6 @@ export async function handleLobbyUserCountGet(roomNumber: string): Promise<UserC
 
 export async function handleLobbyUserListGet(roomNumber: string): Promise<Record<number, User>> {
     const room: Room = await getRoom(roomNumber);
-    if (!room.event) throw new Error("Event not found");
     const userList: Record<number, User> = await getUserList(roomNumber);
     return userList;
 }
