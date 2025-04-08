@@ -1,7 +1,9 @@
 import { Socket, Server as SocketServer } from 'socket.io';
 import { EventRoomChangeModeRequest, EventRoomCreateRequest, EventRoomEnterRequest } from '../../application/event/dto/event.room.dto';
 import { handleEventRoomChangeMode, handleEventRoomCreate, handleEventRoomEnterAndGetHostSocketId } from '../../application/event/event.room.service';
-import { getEventHostSocketDataRoomNumber, setSocketDataRoomNumber, setSocketDataUser } from '../../repository/socket/socket.repository';
+import { getEventHostSocketDataRoomNumber, setEventHostSocketData, setSocketDataUserAndRoomNumber } from '../../repository/socket/socket.repository';
+import { SocketDataType } from '../../common/enums/enums';
+import { RoomNumberRequest } from '../../common/dto/room.dto';
 
 export function onEventRoomCreate(
   _socketServer: SocketServer,
@@ -10,7 +12,7 @@ export function onEventRoomCreate(
   socket.on('event.room.create', async (req: any): Promise<void> => {
     const request: EventRoomCreateRequest = typeof req === 'string' ? JSON.parse(req) : req;
     socket.join(request.roomNumber);
-    setSocketDataRoomNumber(socket, request.roomNumber);
+    setEventHostSocketData(socket, request.roomNumber);
     handleEventRoomCreate(request, socket.id);
   });
 }
@@ -27,6 +29,18 @@ export function onEventRoomChangeMode(
   });
 }
 
+export function onEventRoomHostReEnter(
+  _socketServer: SocketServer,
+  socket: Socket
+): void {
+  socket.on('event.room.host.reEnter', async (req: any): Promise<void> => {
+    const request: RoomNumberRequest = typeof req === 'string' ? JSON.parse(req) : req;
+    socket.join(request.roomNumber);
+    setEventHostSocketData(socket, request.roomNumber);
+    socket.emit('event.room.host.reEntered');
+  });
+}
+
 export function onEventRoomEnter(
   _socketServer: SocketServer,
   socket: Socket
@@ -34,8 +48,7 @@ export function onEventRoomEnter(
   socket.on('event.room.enter', async (req: any): Promise<void> => {
     const request: EventRoomEnterRequest = typeof req === 'string' ? JSON.parse(req) : req;
     socket.join(request.roomNumber);
-    setSocketDataUser(socket, request.user);
-    setSocketDataRoomNumber(socket, request.roomNumber);
+    setSocketDataUserAndRoomNumber(socket, request.user, request.roomNumber, SocketDataType.EVENT_USER);
     const hostSocketId: string = await handleEventRoomEnterAndGetHostSocketId(request);
     _socketServer.to(hostSocketId).emit('event.room.entered', JSON.stringify(request.user));
   });

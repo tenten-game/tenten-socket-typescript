@@ -12,8 +12,9 @@ export function onEventFinishScoreGet(
     const request: EventFinishScoreGetRequest = typeof req === 'string' ? JSON.parse(req) : req;
     const roomNumber: string = getSocketDataRoomNumber(socket);
     const rankings: ProcessRankingsResult = await handleEventFinishScoreGet(roomNumber, request.match);
+
     socket.emit('event.finish.score.got', JSON.stringify(rankings)); // 웹에게 전체 점수
-    rankings.totalRankings = [];
+    rankings.totalRankings = []; // 앱에게 전체 점수는 제외
     _socketServer.to(roomNumber).emit('event.finish.score.got', JSON.stringify(rankings)); // 앱에게 핵심 점수
   });
 }
@@ -34,10 +35,7 @@ export function onEventFinishScorePost(
 ): void {
   socket.on('event.finish.score.post', async (req: any): Promise<void> => {
     const request: EventFinishScorePostRequest = typeof req === 'string' ? JSON.parse(req) : req;
-    const user = getSocketDataUser(socket);
-    const roomNumber = getSocketDataRoomNumber(socket);
-    handleEventFinishScorePost(request, roomNumber, user);
-    socket.emit('event.finish.ranking.got');
+    handleEventFinishScorePost(request, getSocketDataRoomNumber(socket), getSocketDataUser(socket));
   });
 }
 
@@ -47,9 +45,7 @@ export function onEventFinishRankingGet(
 ): void {
   socket.on('event.finish.ranking.get', async (req: any): Promise<void> => {
     const request: EventFinishRankingGetRequest = typeof req === 'string' ? JSON.parse(req) : req;
-    const roomNumber = getSocketDataRoomNumber(socket);
-    const user = getSocketDataUser(socket);
-    const myRanking = await handleEventFinishRankingGet(roomNumber, user, request.match);
+    const myRanking: number = await handleEventFinishRankingGet(getSocketDataRoomNumber(socket), getSocketDataUser(socket), request.match);
     socket.emit('event.finish.ranking.got', JSON.stringify({ ranking: myRanking }));
   });
 }

@@ -1,24 +1,17 @@
 import { User } from "../../../common/entity/user.entity";
+import { SocketDataType } from "../../../common/enums/enums";
 
 export class SocketData {
-    user: User;
-    roomNumber: string;
-
-    constructor(user: User, room: string) {
-        this.user = user;
-        this.roomNumber = room;
-    }
+    constructor(
+        public user: User, 
+        public roomNumber: string,
+        public socketDataType: SocketDataType = SocketDataType.NORMAL_USER,
+    ) { }
 }
 
 export class EventHostSocketData {
-    roomNumber: string;
-    eventCode: string;
-
     constructor(
-        roomNumber: string,
-        eventCode: string,
-    ) {
-        this.roomNumber = roomNumber;
-        this.eventCode = eventCode;
-    }
+        public roomNumber: string,
+        public socketDataType: SocketDataType = SocketDataType.EVENT_HOST,
+    ) { }
 }

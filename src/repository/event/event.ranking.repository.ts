@@ -1,6 +1,8 @@
+import { TOP_N } from '../../common/const/const';
 import { User } from '../../common/entity/user.entity';
 import { redisClient } from '../../config/redis.config';
-import { ProcessRankingsResult, Ranking, RankingDTO, TeamScore, TOP_N } from './entity/rankings.entity';
+import { ProcessRankingsResult, Ranking, RankingDTO, TeamScore } from './entity/rankings.entity';
+
 
 export async function processRankings(
     roomNumber: string,

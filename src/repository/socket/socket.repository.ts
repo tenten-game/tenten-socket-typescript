@@ -1,13 +1,18 @@
 import { Socket } from "socket.io";
 import { User } from "../../common/entity/user.entity";
 import { EventHostSocketData, SocketData } from "./entity/socket.entity";
+import { SocketDataType } from "../../common/enums/enums";
 
-export function setSocketDataUser(
+export function setSocketDataUserAndRoomNumber(
   socket: Socket,
   user: User,
+  roomNumber: string,
+  socketDataType: SocketDataType,
 ): void {
   const socketData: SocketData = socket.data;
   socketData.user = user;
+  socketData.roomNumber = roomNumber;
+  socketData.socketDataType = socketDataType;
 }
 
 export function getSocketDataUser(
@@ -26,14 +31,6 @@ export function getSocketDataUserId(
   return socketData.user.i;
 }
 
-export function setSocketDataRoomNumber(
-  socket: Socket,
-  room: string,
-): void {
-  const socketData: SocketData = socket.data;
-  socketData.roomNumber = room;
-}
-
 export function getSocketDataRoomNumber(
   socket: Socket,
 ): string {
@@ -42,29 +39,13 @@ export function getSocketDataRoomNumber(
   return socketData.roomNumber;
 }
 
-export function getSocketDataRoomNumberNullable(
-  socket: Socket,
-): string {
-  const socketData: SocketData = socket.data;
-  return socketData.roomNumber;
-}
-
 export function setEventHostSocketData(
   socket: Socket,
-  eventCode: string,
   roomNumber: string,
 ): void {
   const eventHostSocketData: EventHostSocketData = socket.data;
-  eventHostSocketData.eventCode = eventCode;
   eventHostSocketData.roomNumber = roomNumber;
-}
-
-export function getEventHostSocketDataEventCode(
-  socket: Socket,
-): string {
-  const eventHostSocketData: EventHostSocketData = socket.data;
-  if (!eventHostSocketData.eventCode) throw new Error('이벤트 코드가 없습니다.');
-  return eventHostSocketData.eventCode;
+  eventHostSocketData.socketDataType = SocketDataType.EVENT_HOST;
 }
 
 export function getEventHostSocketDataRoomNumber(
@@ -79,12 +60,19 @@ export function isUser(
   socket: Socket,
 ): boolean {
   const socketData: SocketData = socket.data;
-  return !!socketData.user;
+  return socketData.socketDataType === SocketDataType.NORMAL_USER;
 }
 
 export function isEventHost(
   socket: Socket,
 ): boolean {
   const eventHostSocketData: EventHostSocketData = socket.data;
-  return !!eventHostSocketData.eventCode;
+  return eventHostSocketData.socketDataType === SocketDataType.EVENT_HOST;
+}
+
+export function isEventUser(
+  socket: Socket,
+): boolean {
+  const eventHostSocketData: EventHostSocketData = socket.data;
+  return eventHostSocketData.socketDataType === SocketDataType.EVENT_USER;
 }

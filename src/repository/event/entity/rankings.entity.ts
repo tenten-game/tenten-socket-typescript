@@ -34,4 +34,3 @@ export interface ProcessRankingsResult {
     totalBottomRankings: RankingDTO[];
 }
 
-export const TOP_N = 10; 

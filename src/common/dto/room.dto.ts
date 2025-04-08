@@ -1,15 +1,11 @@
 export class RoomNumberRequest {
-    number: string;
-
-    constructor(room: string) {
-        this.number = room;
-    }
+    constructor(
+        public roomNumber: string
+    ) { }
 }
 
 export class RoomChangeModeRequest {
-    mode: string;
-
-    constructor(mode: string) {
-        this.mode = mode;
-    }
+    constructor(
+        public mode: string
+    ) { }
 }

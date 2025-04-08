@@ -1,5 +1,5 @@
 import { Socket, Server as SocketServer } from 'socket.io';
-import { getSocketDataRoomNumber, getSocketDataUser, getSocketDataUserId, setSocketDataRoomNumber } from '../../repository/socket/socket.repository';
+import { getSocketDataRoomNumber, getSocketDataUser, getSocketDataUserId, setSocketDataUserAndRoomNumber } from '../../repository/socket/socket.repository';
 import { RoomChangeModeRequest, RoomNumberRequest } from '../../common/dto/room.dto';
 import { handleRoomChangeMode, handleRoomCreate, handleRoomEnter } from '../../application/normal/room.service';
 
@@ -9,8 +9,8 @@ export function onRoomCreate(
 ): void {
   socket.on('room.create', async (req: any): Promise<void> => {
     const room: RoomNumberRequest = typeof req === 'string' ? JSON.parse(req) : req;
-    socket.join(room.number);
-    setSocketDataRoomNumber(socket, room.number);
+    socket.join(room.roomNumber);
+    // setSocketDataUserAndRoomNumber(socket, room.roomNumber);
     handleRoomCreate(room, getSocketDataUser(socket));
   });
 }
@@ -21,8 +21,8 @@ export function onRoomEnter(
 ): void {
   socket.on('room.enter', async (req: any): Promise<void> => {
     const room: RoomNumberRequest = typeof req === 'string' ? JSON.parse(req) : req;
-    socket.join(room.number);
-    setSocketDataRoomNumber(socket, room.number);
+    socket.join(room.roomNumber);
+    // setSocketDataRoomNumber(socket, room.roomNumber);
     handleRoomEnter(room, getSocketDataUser(socket));
     _socketServer.to(getSocketDataRoomNumber(socket)).emit('room.entered', JSON.stringify(getSocketDataUser(socket)));
   });
@@ -45,6 +45,6 @@ export function onRoomExit(
 ): void {
   socket.on('room.enter', async (req: any): Promise<void> => {
     const room: RoomNumberRequest = typeof req === 'string' ? JSON.parse(req) : req;
-    socket.data.room = room.number;
+    socket.data.room = room.roomNumber;
   });
 }

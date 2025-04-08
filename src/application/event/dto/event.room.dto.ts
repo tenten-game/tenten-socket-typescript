@@ -17,7 +17,8 @@ export class Event {
         public hostMainImageUrl: string,
         public mode: string,
         public participantMainImageUrl: string,
-        public type: EventType
+        public type: EventType,
+        public isHostConnected: boolean = true,
     ) { }
 }
 

@@ -1,8 +1,8 @@
 import { Socket, Server as SocketServer } from "socket.io";
 import { EventLobbyStartGameRequest } from "../../application/event/dto/event.lobby.dto";
-import { handleLobbyUserCountGet, handleLobbyUserListGet } from "../../application/event/event.lobby.service";
+import { handleEventLobbyUserListReset, handleLobbyUserCountGet, handleLobbyUserListGet } from "../../application/event/event.lobby.service";
 import { getSocketDataRoomNumber } from "../../repository/socket/socket.repository";
-import { UserCount } from "../../repository/common/entity/userCount.dto";
+import { UserCount } from "../../repository/common/dto/userCount.dto";
 
 export function onLobbyStartGame(
   _socketServer: SocketServer,
@@ -42,6 +42,8 @@ export function onLobbyResetUserList(
   socket: Socket
 ): void {
   socket.on('event.lobby.userList.reset', async (req: any): Promise<void> => {
-
+    const roomNumber: string = getSocketDataRoomNumber(socket);
+    handleEventLobbyUserListReset(roomNumber);
+    _socketServer.to(getSocketDataRoomNumber(socket)).emit('event.lobby.userList.reseted');
   });
 }
