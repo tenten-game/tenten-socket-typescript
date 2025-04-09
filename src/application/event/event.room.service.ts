@@ -27,3 +27,13 @@ export async function handleEventRoomEnterAndGetHostSocketId(request: EventRoomE
     const room: Room = await getRoom(request.roomNumber);
     return room.hostSocketId
 }
+
+export async function handleEventRoomHostReEnter(
+    roomNumber: string,
+    hostSocketId: string,
+): Promise<void> {
+    const room: Room = await getRoom(roomNumber);
+    room.hostSocketId = hostSocketId;
+    room.event!.isHostConnected = true;
+    setRoom(roomNumber, room);
+}
