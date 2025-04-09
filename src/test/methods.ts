@@ -34,7 +34,11 @@ export async function createClients(): Promise<Socket[]> {
 }
 
 export async function listenAllEvents(hostSocket: Socket, clientSockets: Socket[]): Promise<void> {
-    const sockets: Socket[] = [hostSocket, ...clientSockets];
+    hostSocket.on("event.finish.score.got.host", (data: any) => {
+        redisClient.set("00000000" + "_RANKING_RESULT_HO", JSON.stringify(data));
+    });
+
+const sockets: Socket[] = [hostSocket, ...clientSockets];
     sockets.forEach(socket => {
         socket.on('connect_error', (err) => {
             console.log(`Socket ${socket.id} connection error: ${err}`);
@@ -52,6 +56,12 @@ export async function listenAllEvents(hostSocket: Socket, clientSockets: Socket[
         socket.on(HOST_ROOM_CHANGE_MODE_ON, (data: any) => {
             redisClient.incr(HOST_ROOM_CHANGE_MODE_VALID_KEY);
         });
+        socket.on("event.lobby.startedGame", (data: any) => {
+            redisClient.incr("00000000" + "_L_event.lobby.startedGame");
+        });
+        socket.on("event.finish.score.got", (data: any) => {
+            redisClient.set("00000000" + "_RANKING_RESULT_CL", JSON.stringify(data));
+        });
     });
 }
 
@@ -61,9 +71,9 @@ export async function hostEmitCreateRoom(hostSocket: Socket): Promise<void> {
 
 export async function checkIfRoomCreated(): Promise<void> {
     const roomString = await redisClient.get(ROOM_NUMBER) || '';
-    if (roomString.indexOf('"hostSocketId":') === -1) throw new Error();
+    if (roomString.indexOf('"hostSocketId":') === -1) throw new Error('방 생성 - 소켓 ID 없음');
     const listendCount = parseInt(await redisClient.get(CREATE_ROOM_VALID_KEY) || '0');
-    if (listendCount != 1) throw new Error();
+    if (listendCount != 1) throw new Error('방 생성 - LISTEN 수 불일치');
 }
 
 export async function usersEmitEnterRoom(clientSockets: Socket[]): Promise<void> {
@@ -76,9 +86,9 @@ export async function usersEmitEnterRoom(clientSockets: Socket[]): Promise<void>
 
 export async function checkIfEnterRoom(): Promise<void> {
     const listendCount = parseInt(await redisClient.get(ENTER_ROOM_VALID_KEY) || '0');
-    if (listendCount != TOTAL_CLIENTS) throw new Error();
+    if (listendCount != TOTAL_CLIENTS * 2) throw new Error('유저 방 입장 - LISTEN 수 불일치');
     const userCount = await redisClient.zcard(ROOM_NUMBER + '_USERLIST');
-    if (userCount != TOTAL_CLIENTS) throw new Error();
+    if (userCount != TOTAL_CLIENTS) throw new Error('유저 방 입장 - 유저 수 불일치');
 }
 
 export async function hostEmitRoomChangeMode(hostSocket: Socket, mode: RoomMode): Promise<void> {
@@ -90,4 +100,62 @@ export async function checkIfChangedMode(mode: RoomMode, expectedListendCount: n
     if (roomString.indexOf(`"mode":"${mode}"`) === -1) throw new Error();
     const listendCount = parseInt(await redisClient.get(HOST_ROOM_CHANGE_MODE_VALID_KEY) || '0');
     if (listendCount != expectedListendCount) throw new Error();
+}
+
+export async function hostEmitStartGame(hostSocket: Socket): Promise<void> {
+    hostSocket.emit('event.lobby.startGame', {
+        "gameNumber": 4010,
+        "roomNumber": "MC000000",
+    });
+}
+
+export async function clientsEmitRealTimeScore(clientSockets: Socket[]): Promise<void> {
+    let i = 1;
+    for (const clientSocket of clientSockets) {
+        clientSocket.emit('event.ingame.realTimeScore.post', {
+            "score": Math.floor(Math.random() * 100),
+            "match": "MC000000"
+        });
+        i++;
+    }
+}
+
+export async function clientsEmitFinalScore(clientSockets: Socket[]): Promise<void> {
+    let i = 1;
+    for (const clientSocket of clientSockets) {
+        clientSocket.emit('event.finish.score.post', {
+            "score": Math.floor(Math.random() * 500),
+            "match": "MC000000"
+        });
+        i++;
+    }
+}
+
+export async function hostEmitFinishGame(hostSocket: Socket): Promise<void> {
+    hostSocket.emit('event.finish.score.get', {
+        "match": "MC000000",
+    });
+}
+
+export async function hostEmitUserCount(hostSocket: Socket): Promise<void> {
+
+}
+
+export async function checkIfHostUserCount(): Promise<void> {
+
+}
+
+export async function hostEmitUserList(hostSocket: Socket): Promise<void> {
+
+}
+
+export async function checkIfHostUserList(): Promise<void> {
+
+}
+
+export async function userEmitFinishGame(clientSockets: Socket[]): Promise<void> {
+}
+
+export async function hostEmitExit(hostSocket: Socket): Promise<void> {
+
 }

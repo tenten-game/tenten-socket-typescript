@@ -13,7 +13,7 @@ export function onEventFinishScoreGet(
     const roomNumber: string = getSocketDataRoomNumber(socket);
     const rankings: ProcessRankingsResult = await handleEventFinishScoreGet(roomNumber, request.match);
 
-    socket.emit('event.finish.score.got', JSON.stringify(rankings)); // 웹에게 전체 점수
+    socket.emit('event.finish.score.got.host', JSON.stringify(rankings)); // 웹에게 전체 점수
     rankings.totalRankings = []; // 앱에게 전체 점수는 제외
     _socketServer.to(roomNumber).emit('event.finish.score.got', JSON.stringify(rankings)); // 앱에게 핵심 점수
   });

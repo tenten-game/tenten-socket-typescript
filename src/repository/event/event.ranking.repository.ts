@@ -71,7 +71,7 @@ export async function processRankings(
     let maxAverageScore = -Infinity;
     for (const ts of teamScore) {
         if (ts.averageScore > maxAverageScore) {
-            maxAverageScore = ts.totalScore;
+            maxAverageScore = ts.averageScore;
             winTeamId = ts.id;
         }
     }

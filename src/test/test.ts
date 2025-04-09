@@ -1,55 +1,57 @@
 import { Socket } from 'socket.io-client';
-import { checkIfChangedMode, checkIfEnterRoom, checkIfRoomCreated, createClients, createHost, delay, flushRedis, hostEmitCreateRoom, hostEmitRoomChangeMode, listenAllEvents, usersEmitEnterRoom } from "./methods";
 import { RoomMode } from '../common/enums/enums';
 import { TOTAL_CLIENTS } from './command';
+import { checkIfChangedMode, checkIfEnterRoom, checkIfHostUserCount, checkIfHostUserList, checkIfRoomCreated, clientsEmitFinalScore, clientsEmitRealTimeScore, createClients, createHost, flushRedis, hostEmitCreateRoom, hostEmitFinishGame, hostEmitRoomChangeMode, hostEmitStartGame, hostEmitUserCount, hostEmitUserList, listenAllEvents, userEmitFinishGame, usersEmitEnterRoom } from "./methods";
 
 (async function runTest() {
-
-  console.log("0. 소켓 생성 및 REDIS 초기화")
-  await delay();
+  console.log("소켓 생성 및 REDIS 초기화")
   const hostSocket: Socket = await createHost();
-  await delay();
   const clientSockets: Socket[] = await createClients();
-  await delay();
   await listenAllEvents(hostSocket, clientSockets);
-  await delay();
   await flushRedis();
-  console.log("0. 소켓 생성 및 REDIS 초기화 완료")
 
-  await delay();
-
-  console.log("1. 호스트 방 생성")
+  console.log("호스트 방 생성")
   await hostEmitCreateRoom(hostSocket);
-  await delay();
   await checkIfRoomCreated();
-  console.log("1. 호스트 방 생성 완료")
 
-  await delay();
-
-  console.log("2. 클라이언트 방 입장")
+  console.log("클라이언트 방 입장")
   await usersEmitEnterRoom(clientSockets);
-  await delay();
   await checkIfEnterRoom();
-  console.log("2. 클라이언트 방 입장 완료")
 
-  await delay();
-
-  console.log("3. SOLO 로 방 모드 변경")
+  console.log("SOLO 로 방 모드 변경")
   await hostEmitRoomChangeMode(hostSocket, RoomMode.SOLO);
-  await delay();
   await checkIfChangedMode(RoomMode.SOLO, TOTAL_CLIENTS + 1);
-  console.log("3. SOLO 로 방 모드 변경 완료")
 
-  console.log("3. TEAM 으로 방 모드 변경")
+  console.log("TEAM 으로 방 모드 변경")
   await hostEmitRoomChangeMode(hostSocket, RoomMode.TEAM);
-  await delay();
   await checkIfChangedMode(RoomMode.TEAM, (TOTAL_CLIENTS + 1) * 2);
-  console.log("3. TEAM 으로 방 모드 변경 완료")
 
+  console.log("유저 수 조회")
+  await hostEmitUserCount(hostSocket);
+  await checkIfHostUserCount();
 
+  console.log("유저 리스트 조회")
+  await hostEmitUserList(hostSocket);
+  await checkIfHostUserList();
 
+  console.log("게임 시작")
+  await hostEmitStartGame(hostSocket);
 
-  // 방 모드 변경 => TEAM 모드로 변경
+  console.log("실시간 점수 등록")
+  await clientsEmitRealTimeScore(clientSockets);
 
-  // 방 입장
+  console.log("실시간 점수 조회")
+  await clientsEmitRealTimeScore(clientSockets);
+
+  console.log("최종 점수 등록")
+  await clientsEmitFinalScore(clientSockets);
+
+  console.log("최종 랭킹 및 스코어 조회")
+  await hostEmitFinishGame(hostSocket);
+
+  console.log("나의 랭킹 조회")
+  await userEmitFinishGame(clientSockets);
+
+  console.log("게임 종료 후 로비로 이동");
+  await hostEmitExit(hostSocket)
 })();
