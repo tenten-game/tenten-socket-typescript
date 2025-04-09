@@ -4,7 +4,7 @@ import { Socket, Server as SocketServer } from 'socket.io';
 import { onDisconnect, onDisconnecting } from '../presentation/common/connection.controller';
 import { onEventInGameRealTimeScoreGet, onEventInGameRealTimeScorePost } from '../presentation/event/event.ingame.controller';
 import { onLobbyResetUserList, onLobbyStartGame, onLobbyUserCountGet, onLobbyUserListGet } from '../presentation/event/event.lobby.controller';
-import { onEventRoomChangeMode, onEventRoomCreate, onEventRoomEnter } from '../presentation/event/event.room.controller';
+import { onEventRoomChangeMode, onEventRoomCreate, onEventRoomEnter, onEventRoomHostReEnter } from '../presentation/event/event.room.controller';
 import { onEventFinishExit, onEventFinishRankingGet, onEventFinishScoreGet, onEventFinishScorePost } from '../presentation/event/evnet.finish.controller';
 import { onRoomChangeMode, onRoomCreate, onRoomEnter, onRoomExit } from '../presentation/normal/room.controller';
 import { logger } from '../util/logger';
@@ -92,6 +92,7 @@ export function initializeSocket(socketServer: SocketServer): void {
     // ROOM - HOST
     onEventRoomCreate(socketServer, socket);
     onEventRoomChangeMode(socketServer, socket);
+    onEventRoomHostReEnter(socketServer, socket);
     // ROOM - USER
     onEventRoomEnter(socketServer, socket);
 
