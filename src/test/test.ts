@@ -1,7 +1,7 @@
 import { Socket } from 'socket.io-client';
 import { RoomMode } from '../common/enums/enums';
 import { TOTAL_CLIENTS } from './command';
-import { checkIfChangedMode, checkIfEnterRoom, checkIfHostUserCount, checkIfHostUserList, checkIfRoomCreated, clientsEmitFinalScore, clientsEmitRealTimeScore, createClients, createHost, flushRedis, hostEmitCreateRoom, hostEmitFinishGame, hostEmitRoomChangeMode, hostEmitStartGame, hostEmitUserCount, hostEmitUserList, listenAllEvents, userEmitFinishGame, usersEmitEnterRoom } from "./methods";
+import { checkIfChangedMode, checkIfEnterRoom, checkIfHostUserCount, checkIfHostUserList, checkIfRoomCreated, clientsEmitFinalScore, clientsEmitRealTimeScore, createClients, createHost, flushRedis, hostEmitCreateRoom, hostEmitExit, hostEmitFinishGame, hostEmitRoomChangeMode, hostEmitStartGame, hostEmitUserCount, hostEmitUserList, listenAllEvents, userEmitFinishGame, usersEmitEnterRoom } from "./methods";
 
 (async function runTest() {
   console.log("소켓 생성 및 REDIS 초기화")
@@ -53,5 +53,5 @@ import { checkIfChangedMode, checkIfEnterRoom, checkIfHostUserCount, checkIfHost
   await userEmitFinishGame(clientSockets);
 
   console.log("게임 종료 후 로비로 이동");
-  await hostEmitExit(hostSocket)
+  await hostEmitExit(hostSocket);
 })();
