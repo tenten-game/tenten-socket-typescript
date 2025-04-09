@@ -14,6 +14,7 @@ export function onEventRoomCreate(
     socket.join(request.roomNumber);
     setEventHostSocketData(socket, request.roomNumber);
     handleEventRoomCreate(request, socket.id);
+    socket.emit('event.room.created');
   });
 }
 
@@ -51,5 +52,6 @@ export function onEventRoomEnter(
     setSocketDataUserAndRoomNumber(socket, request.user, request.roomNumber, SocketDataType.EVENT_USER);
     const hostSocketId: string = await handleEventRoomEnterAndGetHostSocketId(request);
     _socketServer.to(hostSocketId).emit('event.room.entered', JSON.stringify(request.user));
+    socket.emit('event.room.entered');
   });
 }

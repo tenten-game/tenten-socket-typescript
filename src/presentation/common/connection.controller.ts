@@ -8,19 +8,18 @@ export function onDisconnecting(
   socket: Socket
 ): void {
   socket.on('disconnecting', async (reason: DisconnectReason): Promise<void> => {
-    console.log('disconnecting', reason);
     if (isUser(socket)) {
       handleNormalUserDisconnected();
     } else if (isEventHost(socket)) {
-      console.log('event host disconnected');
       const roomNumber: string = getEventHostSocketDataRoomNumber(socket);
       handleEventHostDisconnected(roomNumber);
     } else if (isEventUser(socket)) {
-      console.log('event user disconnected');
       const roomNumber: string = getSocketDataRoomNumber(socket);
       const user: User = getSocketDataUser(socket);
       const hostSocketId: string = await handleEventUserDisconnected(roomNumber, user);
       socketServer.to(hostSocketId).emit('event.room.userDisconnected', JSON.stringify(user));
+    } else { // 등록된 적 없는 유저의 끊김 - 아무것도 안함
+
     }
   });
 }
