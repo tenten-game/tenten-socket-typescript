@@ -8,10 +8,11 @@ export function delay(): Promise<void> {
 }
 
 export async function flushRedis(): Promise<void> {
-   const keys = await redisClient.keys(ROOM_NUMBER + '*');
+    const keys = await redisClient.keys(ROOM_NUMBER + '*');
     if (keys.length > 0) {
         await redisClient.del(keys);
     }
+    await delay();
 }
 
 export async function createClient(id: number): Promise<Socket> {
@@ -26,10 +27,12 @@ export async function createHost(): Promise<Socket> {
 
 export async function createClients(): Promise<Socket[]> {
     const clientSockets: Socket[] = [];
+    const random = Math.floor(Math.random() * 10000) + 1;
     for (let i = 1; i <= TOTAL_CLIENTS; i++) {
-        const clientSocket: Socket = await createClient(i);
+        const clientSocket: Socket = await createClient(i + random);
         clientSockets.push(clientSocket);
     }
+    await delay();
     return clientSockets;
 }
 
@@ -37,16 +40,15 @@ export async function listenAllEvents(hostSocket: Socket, clientSockets: Socket[
     hostSocket.on("event.finish.score.got.host", (data: any) => {
         redisClient.set("00000000" + "_RANKING_RESULT_HO", JSON.stringify(data));
     });
-
-const sockets: Socket[] = [hostSocket, ...clientSockets];
+    // const sockets: Socket[] = [hostSocket, ...clientSockets];
+    const sockets: Socket[] = [...clientSockets];
     sockets.forEach(socket => {
         socket.on('connect_error', (err) => {
             console.log(`Socket ${socket.id} connection error: ${err}`);
-          });
+        });
         socket.on('disconnect', (reason: string) => {
             console.log(`Socket ${socket.id} disconnected: ${reason}`);
         });
-
         socket.on(CREATE_ROOM_ON, (data: any) => {
             redisClient.incr(CREATE_ROOM_VALID_KEY);
         });
@@ -63,10 +65,12 @@ const sockets: Socket[] = [hostSocket, ...clientSockets];
             redisClient.set("00000000" + "_RANKING_RESULT_CL", JSON.stringify(data));
         });
     });
+    await delay();
 }
 
 export async function hostEmitCreateRoom(hostSocket: Socket): Promise<void> {
     hostSocket.emit(CREATE_ROOM_EMIT, CREATE_ROOM_REQUEST);
+    await delay();
 }
 
 export async function checkIfRoomCreated(): Promise<void> {
@@ -74,14 +78,17 @@ export async function checkIfRoomCreated(): Promise<void> {
     if (roomString.indexOf('"hostSocketId":') === -1) throw new Error('방 생성 - 소켓 ID 없음');
     const listendCount = parseInt(await redisClient.get(CREATE_ROOM_VALID_KEY) || '0');
     if (listendCount != 1) throw new Error('방 생성 - LISTEN 수 불일치');
+    await delay();
 }
 
 export async function usersEmitEnterRoom(clientSockets: Socket[]): Promise<void> {
     let i = 1;
+    const random = Math.floor(Math.random() * 1000000) + 1;
     for (const clientSocket of clientSockets) {
-        clientSocket.emit(ENTER_ROOM_EMIT, ENTER_ROOM_REQUEST(i));
+        clientSocket.emit(ENTER_ROOM_EMIT, ENTER_ROOM_REQUEST(i + random));
         i++;
     }
+    await delay();
 }
 
 export async function checkIfEnterRoom(): Promise<void> {
@@ -89,10 +96,12 @@ export async function checkIfEnterRoom(): Promise<void> {
     if (listendCount != TOTAL_CLIENTS * 2) throw new Error('유저 방 입장 - LISTEN 수 불일치');
     const userCount = await redisClient.zcard(ROOM_NUMBER + '_USERLIST');
     if (userCount != TOTAL_CLIENTS) throw new Error('유저 방 입장 - 유저 수 불일치');
+    await delay();
 }
 
 export async function hostEmitRoomChangeMode(hostSocket: Socket, mode: RoomMode): Promise<void> {
     hostSocket.emit(HOST_ROOM_CHANGE_MODE_EMIT, HOST_ROOM_CHANGE_MODE_REQUEST(mode));
+    await delay();
 }
 
 export async function checkIfChangedMode(mode: RoomMode, expectedListendCount: number): Promise<void> {
@@ -100,6 +109,7 @@ export async function checkIfChangedMode(mode: RoomMode, expectedListendCount: n
     if (roomString.indexOf(`"mode":"${mode}"`) === -1) throw new Error();
     const listendCount = parseInt(await redisClient.get(HOST_ROOM_CHANGE_MODE_VALID_KEY) || '0');
     if (listendCount != expectedListendCount) throw new Error();
+    await delay();
 }
 
 export async function hostEmitStartGame(hostSocket: Socket): Promise<void> {
@@ -107,6 +117,7 @@ export async function hostEmitStartGame(hostSocket: Socket): Promise<void> {
         "gameNumber": 4010,
         "roomNumber": "MC000000",
     });
+    await delay();
 }
 
 export async function clientsEmitRealTimeScore(clientSockets: Socket[]): Promise<void> {
@@ -118,6 +129,7 @@ export async function clientsEmitRealTimeScore(clientSockets: Socket[]): Promise
         });
         i++;
     }
+    await delay();
 }
 
 export async function clientsEmitFinalScore(clientSockets: Socket[]): Promise<void> {
@@ -129,33 +141,40 @@ export async function clientsEmitFinalScore(clientSockets: Socket[]): Promise<vo
         });
         i++;
     }
+    await delay();
 }
 
 export async function hostEmitFinishGame(hostSocket: Socket): Promise<void> {
     hostSocket.emit('event.finish.score.get', {
         "match": "MC000000",
     });
+    await delay();
 }
 
 export async function hostEmitUserCount(hostSocket: Socket): Promise<void> {
 
+    await delay();
 }
 
 export async function checkIfHostUserCount(): Promise<void> {
 
+    await delay();
 }
 
 export async function hostEmitUserList(hostSocket: Socket): Promise<void> {
 
+    await delay();
 }
 
 export async function checkIfHostUserList(): Promise<void> {
 
+    await delay();
 }
 
 export async function userEmitFinishGame(clientSockets: Socket[]): Promise<void> {
+    await delay();
 }
 
 export async function hostEmitExit(hostSocket: Socket): Promise<void> {
-
+    await delay();
 }
