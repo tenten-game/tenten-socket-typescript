@@ -6,7 +6,7 @@ import { ProcessRankingsResult, Ranking, RankingDTO, TeamScore } from './entity/
 
 export async function processRankings(
     roomNumber: string,
-    match: string,
+    match: number,
     teamIds: number[],
 ): Promise<ProcessRankingsResult> {
     const rankingKey = generateKey(roomNumber, match);
@@ -118,7 +118,7 @@ function assignRanks(rankings: Ranking[]): (Ranking & { rank: number })[] {
 export function zaddScore(
     roomNumber: string,
     score: number,
-    match: string,
+    match: number,
     user: User,
 ): void {
     const rankingKey = generateKey(roomNumber, match);
@@ -127,7 +127,7 @@ export function zaddScore(
 
 export async function zRevRank(
     roomNumber: string,
-    match: string,
+    match: number,
     user: User,
 ): Promise<number> {
     const rankingKey = generateKey(roomNumber, match) + "_CALCULATED";
@@ -135,6 +135,6 @@ export async function zRevRank(
     return parseInt(ranking);
 }
 
-function generateKey(roomNumber: string, match: string): string {
+function generateKey(roomNumber: string, match: number): string {
     return `${roomNumber}_${match}_RANKING`;
 }

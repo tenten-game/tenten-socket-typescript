@@ -2,7 +2,6 @@ import { Room } from "../../common/entity/room.entity";
 import { redisClient } from "../../config/redis.config";
 
 export function setRoom(roomNumber: string, room: Room): void {
-    console.log(JSON.stringify(room));
     redisClient.set(generateRoomKey(roomNumber), JSON.stringify(room));
 }
 

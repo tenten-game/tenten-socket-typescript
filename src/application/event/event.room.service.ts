@@ -33,9 +33,7 @@ export async function handleEventRoomHostReEnter(
     hostSocketId: string,
 ): Promise<void> {
     const room: Room = await getRoom(roomNumber);
-    console.log("previous host socket id", room.hostSocketId);
     room.hostSocketId = hostSocketId;
-    console.log("new host socket id", room.hostSocketId);
     room.event!.isHostConnected = true;
     setRoom(roomNumber, room);
 }

@@ -29,6 +29,19 @@ export function onDisconnect(
   socket: Socket
 ): void {
   socket.on('disconnect', async (reason: string): Promise<void> => {
-    console.log('disconnect', reason);
+  });
+}
+
+export function onTest(
+  socketServer: SocketServer,
+  socket: Socket
+): void {
+  // test. 으로 시작하는 모든건 모든 방에 전송
+  socket.on('test.emit.realtimescore', (data: any) => {
+    socketServer.to(getEventHostSocketDataRoomNumber(socket)).emit('test.realtimescore');
+  });
+
+  socket.on("test.emit.finalscore", (data: any) => {
+    socketServer.to(getEventHostSocketDataRoomNumber(socket)).emit('test.finalscore');
   });
 }

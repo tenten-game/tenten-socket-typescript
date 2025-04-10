@@ -4,11 +4,16 @@ import { TOTAL_CLIENTS } from './command';
 import { checkIfChangedMode, checkIfEnterRoom, checkIfHostUserCount, checkIfHostUserList, checkIfRoomCreated, clientsEmitFinalScore, clientsEmitRealTimeScore, createClients, createHost, flushRedis, hostEmitCreateRoom, hostEmitExit, hostEmitFinishGame, hostEmitRoomChangeMode, hostEmitStartGame, hostEmitUserCount, hostEmitUserList, listenAllEvents, userEmitFinishGame, usersEmitEnterRoom } from "./methods";
 
 (async function runTest() {
-  console.log("소켓 생성 및 REDIS 초기화")
-  // const hostSocket: Socket = await createHost();
+  console.log("시작")
   const clientSockets: Socket[] = await createClients();
-  // await listenAllEvents(hostSocket, clientSockets);
   await listenAllEvents(clientSockets[0], clientSockets);
+  await usersEmitEnterRoom(clientSockets);
+
+  // console.log("소켓 생성 및 REDIS 초기화")
+  // const hostSocket: Socket = await createHost();
+  // const clientSockets: Socket[] = await createClients();
+  // await listenAllEvents(hostSocket, clientSockets);
+  // await listenAllEvents(clientSockets[0], clientSockets);
   // await flushRedis();
 
   // console.log("호스트 방 생성")
@@ -16,7 +21,7 @@ import { checkIfChangedMode, checkIfEnterRoom, checkIfHostUserCount, checkIfHost
   // await checkIfRoomCreated();
 
   // console.log("클라이언트 방 입장")
-  await usersEmitEnterRoom(clientSockets);
+  // await usersEmitEnterRoom(clientSockets);
   // await checkIfEnterRoom();
 
   // console.log("SOLO 로 방 모드 변경")

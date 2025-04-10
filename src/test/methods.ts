@@ -37,9 +37,9 @@ export async function createClients(): Promise<Socket[]> {
 }
 
 export async function listenAllEvents(hostSocket: Socket, clientSockets: Socket[]): Promise<void> {
-    hostSocket.on("event.finish.score.got.host", (data: any) => {
-        redisClient.set("00000000" + "_RANKING_RESULT_HO", JSON.stringify(data));
-    });
+    // hostSocket.on("event.finish.score.got.host", (data: any) => {
+    //     redisClient.set("00000000" + "_RANKING_RESULT_HO", JSON.stringify(data));
+    // });
     // const sockets: Socket[] = [hostSocket, ...clientSockets];
     const sockets: Socket[] = [...clientSockets];
     sockets.forEach(socket => {
@@ -64,6 +64,21 @@ export async function listenAllEvents(hostSocket: Socket, clientSockets: Socket[
         socket.on("event.finish.score.got", (data: any) => {
             redisClient.set("00000000" + "_RANKING_RESULT_CL", JSON.stringify(data));
         });
+
+        socket.on("test.realtimescore", (data: any) => {
+            socket.emit('event.ingame.realTimeScore.post', {
+                "score": Math.floor(Math.random() * 200),
+                "match": 1
+            });
+        });
+
+        socket.on("test.finalscore", (data: any) => {
+            socket.emit('event.finish.score.post', {
+                "score": Math.floor(Math.random() * 500),
+                "match": 1
+            });
+        });
+
     });
     await delay();
 }
@@ -125,7 +140,7 @@ export async function clientsEmitRealTimeScore(clientSockets: Socket[]): Promise
     for (const clientSocket of clientSockets) {
         clientSocket.emit('event.ingame.realTimeScore.post', {
             "score": Math.floor(Math.random() * 100),
-            "match": "MC000000"
+            "match": 1
         });
         i++;
     }
@@ -137,7 +152,7 @@ export async function clientsEmitFinalScore(clientSockets: Socket[]): Promise<vo
     for (const clientSocket of clientSockets) {
         clientSocket.emit('event.finish.score.post', {
             "score": Math.floor(Math.random() * 500),
-            "match": "MC000000"
+            "match": 1
         });
         i++;
     }
@@ -146,7 +161,7 @@ export async function clientsEmitFinalScore(clientSockets: Socket[]): Promise<vo
 
 export async function hostEmitFinishGame(hostSocket: Socket): Promise<void> {
     hostSocket.emit('event.finish.score.get', {
-        "match": "MC000000",
+        "match": 1
     });
     await delay();
 }

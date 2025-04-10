@@ -1,14 +1,14 @@
 export class RealTimeScorePostRequest {
     constructor(
         public score: number, 
-        public match: string
+        public match: number
     ) { }
 }
 
 export class RealTimeScoreGetRequest {
     constructor(
         public teamId: number, 
-        public match: string
+        public match: number
     ) { }
 }
 

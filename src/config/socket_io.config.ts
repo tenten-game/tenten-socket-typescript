@@ -1,7 +1,7 @@
 import { instrument } from '@socket.io/admin-ui';
 import { Server as HttpServer } from "http";
 import { Socket, Server as SocketServer } from 'socket.io';
-import { onDisconnect, onDisconnecting } from '../presentation/common/connection.controller';
+import { onDisconnect, onDisconnecting, onTest } from '../presentation/common/connection.controller';
 import { onEventInGameRealTimeScoreGet, onEventInGameRealTimeScorePost } from '../presentation/event/event.ingame.controller';
 import { onLobbyResetUserList, onLobbyStartGame, onLobbyUserCountGet, onLobbyUserListGet } from '../presentation/event/event.lobby.controller';
 import { onEventRoomChangeMode, onEventRoomCreate, onEventRoomEnter, onEventRoomHostReEnter } from '../presentation/event/event.room.controller';
@@ -50,15 +50,17 @@ export function installSocketIo(https: HttpServer): SocketServer {
 export function initializeSocket(socketServer: SocketServer): void {
   socketServer.on('connection', async (socket: Socket): Promise<void> => {
     // 받는것 로깅
-    if (config.env === 'development') {
-      socket.onAny((event, ...args) => logger.debug(`[ON] Socket Event: ${event}, Args: ${JSON.stringify(args)}`));
-      socket.onAnyOutgoing((event, ...args) => logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}`));
-      const originalEmit = socketServer.emit;
-      socketServer.emit = function (event: string, ...args: any[]) {
-        logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}`);
-        return originalEmit.apply(socketServer, [event, ...args]);
-      }
-    }
+    // if (config.env === 'development') {
+    //   socket.onAny((event, ...args) => logger.debug(`[ON] Socket Event: ${event}, Args: ${JSON.stringify(args)}`));
+    //   socket.onAnyOutgoing((event, ...args) => logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}`));
+    //   const originalEmit = socketServer.emit;
+    //   socketServer.emit = function (event: string, ...args: any[]) {
+    //     logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}`);
+    //     return originalEmit.apply(socketServer, [event, ...args]);
+    //   }
+    // }
+
+    onTest(socketServer, socket);
 
     // NORMAL APP
     // CONNECTION

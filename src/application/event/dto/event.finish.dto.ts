@@ -1,25 +1,25 @@
 export class EventFinishScoreGetRequest {
     constructor(
-        public match: string,
+        public match: number,
     ) { }
 }
 
 export class EventFinishScorePostRequest {
     constructor(
         public score: number,
-        public match: string,
+        public match: number,
     ) { }
 }
 
 export class EventFinishRankingGetResponse {
     constructor(
-        public match: string,
+        public match: number,
         public ranking: number[],
     ) { }
 }
 
 export class EventFinishRankingGetRequest {
     constructor(
-        public match: string,
+        public match: number,
     ) { }
 }

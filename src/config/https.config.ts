@@ -20,7 +20,6 @@ export function installHttps(app: Application): HttpServer {
     https = require('https').createServer(options, app);
   } catch (err) {
     port = parseInt(config.httpPort);
-    console.log('https error - so running on http', port, err);
     https = require('http').createServer(app);
   }
 
