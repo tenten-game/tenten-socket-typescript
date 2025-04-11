@@ -8,3 +8,12 @@ npm install
 
 run me
 ts-node src/app.ts
+
+
+sudo env "PATH=$PATH" pm2
+pm2 start ecosystem.config.js
+pm2 start ecosystem.config.js --env image
+pm2 start ecosystem.config.js --env image
+APP_NUMBER=2 pm2 start ecosystem.config.js --env production
+APP_NUMBER=4 pm2 start ecosystem.config.js --env production
+APP_NUMBER=5 pm2 start ecosystem.config.js --env production

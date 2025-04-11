@@ -13,8 +13,8 @@ module.exports = {
             env_local: {
                 NODE_ENV: 'local',
             },
-            env_image: {
-                NODE_ENV: 'image',
+            env_test: {
+                NODE_ENV: 'test',
             },
             env_production: {
                 NODE_ENV: 'production',

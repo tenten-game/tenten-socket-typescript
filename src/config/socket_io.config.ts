@@ -1,7 +1,7 @@
 import { instrument } from '@socket.io/admin-ui';
 import { Server as HttpServer } from "http";
 import { Socket, Server as SocketServer } from 'socket.io';
-import { onDisconnect, onDisconnecting, onTest } from '../presentation/common/connection.controller';
+import { onDisconnecting, onTest } from '../presentation/common/connection.controller';
 import { onEventInGameRealTimeScoreGet, onEventInGameRealTimeScorePost } from '../presentation/event/event.ingame.controller';
 import { onLobbyResetUserList, onLobbyStartGame, onLobbyUserCountGet, onLobbyUserListGet } from '../presentation/event/event.lobby.controller';
 import { onEventRoomChangeMode, onEventRoomCreate, onEventRoomEnter, onEventRoomHostReEnter } from '../presentation/event/event.room.controller';
@@ -17,8 +17,8 @@ export function installSocketIo(https: HttpServer): SocketServer {
   const jwt = require('jsonwebtoken');
 
   const socketIO: SocketServer = socket(https, {
-    pingInterval: 10000, // ping 메시지 전송 간격 (밀리초)
-    pingTimeout: 5000, // ping 메시지 응답 대기 시간 (밀리초)
+    pingInterval: 25000, // ping 메시지 전송 간격 (밀리초)
+    pingTimeout: 20000, // ping 메시지 응답 대기 시간 (밀리초)
     cors: {
       origin: ['https://admin.socket.io'],
       credentials: true,
@@ -50,22 +50,21 @@ export function installSocketIo(https: HttpServer): SocketServer {
 export function initializeSocket(socketServer: SocketServer): void {
   socketServer.on('connection', async (socket: Socket): Promise<void> => {
     // 받는것 로깅
-    // if (config.env === 'development') {
-    //   socket.onAny((event, ...args) => logger.debug(`[ON] Socket Event: ${event}, Args: ${JSON.stringify(args)}`));
-    //   socket.onAnyOutgoing((event, ...args) => logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}`));
-    //   const originalEmit = socketServer.emit;
-    //   socketServer.emit = function (event: string, ...args: any[]) {
-    //     logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}`);
-    //     return originalEmit.apply(socketServer, [event, ...args]);
-    //   }
-    // }
-
-    onTest(socketServer, socket);
+    if (config.env === 'development') {
+      socket.onAny((event, ...args) => logger.debug(`[ON] Socket Event: ${event}, Args: ${JSON.stringify(args)}`));
+      socket.onAnyOutgoing((event, ...args) => logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}`));
+      const originalEmit = socketServer.emit;
+      socketServer.emit = function (event: string, ...args: any[]) {
+        logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}`);
+        return originalEmit.apply(socketServer, [event, ...args]);
+      }
+    } else if (config.env === 'test') {
+      onTest(socketServer, socket);
+    }
 
     // NORMAL APP
     // CONNECTION
     onDisconnecting(socketServer, socket);
-    onDisconnect(socketServer, socket);
 
     // ROOM
     onRoomCreate(socketServer, socket);

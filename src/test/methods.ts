@@ -16,7 +16,9 @@ export async function flushRedis(): Promise<void> {
 }
 
 export async function createClient(id: number): Promise<Socket> {
-    const socket: Socket = io(TARGET, { transports: ['websocket'] });
+    const socket: Socket = io(TARGET, { 
+        transports: ['websocket'],
+    });
     return socket;
 }
 
