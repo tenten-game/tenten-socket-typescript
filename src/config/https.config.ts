@@ -12,7 +12,6 @@ export function installHttps(app: Application): HttpServer {
   if (config.env === 'local') return handleHttpLocal(app);
 
   try {
-    console.log(config.serverUrl);
     const options: {} = {
       ca: fs.readFileSync(`/etc/letsencrypt/live/${config.serverUrl}/chain.pem`),
       key: fs.readFileSync(`/etc/letsencrypt/live/${config.serverUrl}/privkey.pem`),
