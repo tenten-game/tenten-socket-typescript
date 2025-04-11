@@ -4,11 +4,13 @@ const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : proc
 dotenv.config({ path: envFile });
 
 // 앱 서버명 판단 => app.tenten.games => app${number}.tenten.games
+console.log('ddd =>', process.env.APP_NUMBER);
 const PROD_NUMBER: string = process.env.APP_NUMBER || '';
 const ENV_SERVER_URL: string = process.env.NODE_ENV === 'image' ? 'image.tenten.games' : process.env.SERVER_URL || 'development.tenten.games'
 const SERVER_URL: string = process.env.NODE_ENV === 'production'
   ? ENV_SERVER_URL.replace('app', `app${PROD_NUMBER}`)
   : ENV_SERVER_URL;
+console.log('SERVER_URL =>', SERVER_URL);
 
 // 기본 export 설정
 export const config = {
