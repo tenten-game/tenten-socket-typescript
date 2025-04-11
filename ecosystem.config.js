@@ -5,7 +5,7 @@ module.exports = {
             name: 'socket',
             script: 'dist/app.js',
             exec_mode: 'cluster',
-            instances: 'max',
+            instances: 10,
             watch: false,
             max_memory_restart: '2G',
             env: {
