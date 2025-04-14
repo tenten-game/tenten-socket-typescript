@@ -21,16 +21,6 @@ export async function processRankingsNoTotalRankings(
         );
     });
 
-    const totalRankings: RankingDTO[] = overallRankings.map(r => ({
-        r: r.rank as number,
-        s: r.score as number,
-        u: r.i,
-        a: r.a,
-        f: r.f,
-        n: r.n,
-        t: r.t,
-    }));
-
     const teamScore: TeamScore[] = [];
     const teamTopRankings: { [teamId: number]: RankingDTO[] } = {};
     const teamBottomRankings: { [teamId: number]: RankingDTO[] } = {};
@@ -75,22 +65,34 @@ export async function processRankingsNoTotalRankings(
         }
     }
 
-    const totalTopRankings = totalRankings.slice(0, TOP_N);
-    const totalBottomRankings = totalRankings.slice(-TOP_N);
-    const totalMiddleRankings = totalRankings.slice(Math.floor(totalRankings.length / 2), Math.ceil(totalRankings.length / 2) + 1); // total Rankings 의 딱 중간 랭킹
+    const totalTopRankings = overallRankings.slice(0, TOP_N).map(mapRankingToDTO);
+    const totalBottomRankings = overallRankings.slice(-TOP_N).map(mapRankingToDTO);
+    const totalMiddleRankings = overallRankings.slice(Math.floor(overallRankings.length / 2), Math.ceil(overallRankings.length / 2) + 1).map(mapRankingToDTO); // total Rankings 의 딱 중간 랭킹
 
     const response: ProcessRankingsResult = {
         winTeamId,
         teamScore,
         totalRankings: [], // 전체 랭킹은 필요없음
         teamTopRankings,
-        teamBottomRankings: [],
+        teamBottomRankings: [], // 팀 랭킹은 필요없음
         totalTopRankings,
         totalBottomRankings,
         totalMiddleRankings,
     };
     redisClient.set(`${rankingKey}_RESULT`, JSON.stringify(response));
     return response;
+}
+
+function mapRankingToDTO(ranking: Ranking): RankingDTO {
+    return {
+        r: ranking.rank as number,
+        s: ranking.score as number,
+        u: ranking.i,
+        a: ranking.a,
+        f: ranking.f,
+        n: ranking.n,
+        t: ranking.t,
+    };
 }
 
 async function getAllRankings(rankingKey: string): Promise<Ranking[]> {
