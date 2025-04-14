@@ -74,7 +74,7 @@ export async function processRankingsNoTotalRankings(
         teamScore,
         totalRankings: [], // 전체 랭킹은 필요없음
         teamTopRankings,
-        teamBottomRankings: [], // 팀 랭킹은 필요없음
+        teamBottomRankings: {}, // 팀 랭킹은 필요없음
         totalTopRankings,
         totalBottomRankings,
         totalMiddleRankings,
