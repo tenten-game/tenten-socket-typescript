@@ -32,5 +32,5 @@ export interface ProcessRankingsResult {
     teamBottomRankings: { [teamId: number]: RankingDTO[] };
     totalTopRankings: RankingDTO[];
     totalBottomRankings: RankingDTO[];
+    totalMiddleRankings: RankingDTO[];
 }
-
