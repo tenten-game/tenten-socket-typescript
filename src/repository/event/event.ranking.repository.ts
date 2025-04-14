@@ -134,7 +134,7 @@ export async function zRevRank(
     user: User,
 ): Promise<number> {
     const rankingKey = generateKey(roomNumber, match) + "_CALCULATED";
-    const ranking: string = (await redisClient.zscore(rankingKey, JSON.stringify(user))) || "999";
+    const ranking: string = (await redisClient.zscore(rankingKey, JSON.stringify(user))) || "-1";
     return parseInt(ranking);
 }
 
@@ -157,7 +157,7 @@ export async function processRankings(
     overallRankings.forEach(ranking => {
         redisClient.zadd(
             calculatedKey,
-            ranking.rank || 9999,
+            ranking.rank || -1,
             JSON.stringify(new User(ranking.i, ranking.a, ranking.f, ranking.t, ranking.n))
         );
     });
