@@ -1,6 +1,6 @@
 import { Socket, Server as SocketServer } from "socket.io";
 import { EventLobbyStartGameRequest } from "../../application/event/dto/event.lobby.dto";
-import { handleEventLobbyUserListReset, handleLobbyUserCountGet, handleLobbyUserListGet } from "../../application/event/event.lobby.service";
+import { handleEventLobbyUserListReset, handleLobbyUserCountGet, handleLobbyUserListGet, handleShuffleTeam } from "../../application/event/event.lobby.service";
 import { getSocketDataRoomNumber } from "../../repository/socket/socket.repository";
 import { UserCount } from "../../repository/common/dto/userCount.dto";
 
@@ -45,5 +45,16 @@ export function onLobbyResetUserList(
     const roomNumber: string = getSocketDataRoomNumber(socket);
     handleEventLobbyUserListReset(roomNumber);
     _socketServer.to(getSocketDataRoomNumber(socket)).emit('event.lobby.userList.reseted');
+  });
+}
+
+export function onLobbyShuffleTeam(
+  _socketServer: SocketServer,
+  socket: Socket
+): void {
+  socket.on('event.lobby.shuffleTeam', async (req: any): Promise<void> => {
+    const roomNumber: string = getSocketDataRoomNumber(socket);
+    const userIds: number[] = await handleShuffleTeam(roomNumber);
+    _socketServer.to(roomNumber).emit('event.lobby.shuffledTeam', JSON.stringify(userIds));
   });
 }
