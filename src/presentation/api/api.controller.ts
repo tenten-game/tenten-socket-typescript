@@ -17,7 +17,7 @@ export function initializeHttp(app: Application): void {
   });
 
   app.get('/match-results', async function (req: Request, res: Response): Promise<void> {
-    const roomNumber: string = req.query.roomNumber as string;
+    const roomNumber: string = req.query.room as string;
     const match: string = req.query.match as string;
     res.send(await redisClient.get(`${roomNumber}_${match}_RANKING_RESULT`) || '{}');
   });
