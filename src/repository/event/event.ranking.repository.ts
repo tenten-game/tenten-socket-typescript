@@ -28,10 +28,10 @@ export async function processRankingsNoTotalRankings(
     for (const teamId of teamIds) {
         const teamRankings = overallRankings.filter(r => r.t === teamId);
         const totalScore = teamRankings.reduce((sum, r) => sum + (r.score || 0), 0);
-        const averageScore = teamRankings.length > 0 ? totalScore / teamRankings.length : 0;
-        // 소수점 셋째 자리 반올림
-        const roundedAverageScore = Math.round(averageScore * 100) / 100;
-        teamScore.push({ id: teamId, totalScore, averageScore: roundedAverageScore });
+        const averageScore = teamRankings.length > 0 
+          ? Math.round((totalScore / teamRankings.length) * 100) / 100 
+          : 0;
+        teamScore.push({ id: teamId, totalScore, averageScore: averageScore });
 
         const sortedTeamRankings = teamRankings.sort((a, b) => (a.rank as number) - (b.rank as number));
         teamTopRankings[teamId] = sortedTeamRankings
