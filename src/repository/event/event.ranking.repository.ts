@@ -29,7 +29,9 @@ export async function processRankingsNoTotalRankings(
         const teamRankings = overallRankings.filter(r => r.t === teamId);
         const totalScore = teamRankings.reduce((sum, r) => sum + (r.score || 0), 0);
         const averageScore = teamRankings.length > 0 ? totalScore / teamRankings.length : 0;
-        teamScore.push({ id: teamId, totalScore, averageScore });
+        // 소수점 셋째 자리 반올림
+        const roundedAverageScore = Math.round(averageScore * 100) / 100;
+        teamScore.push({ id: teamId, totalScore, averageScore: roundedAverageScore });
 
         const sortedTeamRankings = teamRankings.sort((a, b) => (a.rank as number) - (b.rank as number));
         teamTopRankings[teamId] = sortedTeamRankings
@@ -58,10 +60,12 @@ export async function processRankingsNoTotalRankings(
 
     let winTeamId = teamIds[0];
     let maxAverageScore = -Infinity;
-    for (const ts of teamScore) {
+    for (const ts of teamScore) { // 무승부일 경우도 처리
         if (ts.averageScore > maxAverageScore) {
             maxAverageScore = ts.averageScore;
             winTeamId = ts.id;
+        } else if (ts.averageScore === maxAverageScore) {
+            winTeamId = 0; // 무승부
         }
     }
 
