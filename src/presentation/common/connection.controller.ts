@@ -33,6 +33,24 @@ export function onDisconnecting(
   });
 }
 
+export function onDisconnect(
+  socketServer: SocketServer,
+  socket: Socket
+): void {
+  socket.on('disconnect', async (reason: string): Promise<void> => {
+    console.log(`Socket ${socket.id} disconnected: ${reason}`);
+  });
+}
+
+export function onConnectError(
+  socketServer: SocketServer,
+  socket: Socket
+): void {
+  socket.on('connect_error', async (err): Promise<void> => {
+    console.log(`Socket ${socket.id} connection error: ${err}`);
+  });
+}
+
 export function onTest(
   socketServer: SocketServer,
   socket: Socket

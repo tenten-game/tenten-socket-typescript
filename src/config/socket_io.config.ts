@@ -1,7 +1,7 @@
 import { instrument } from '@socket.io/admin-ui';
 import { Server as HttpServer } from "http";
 import { Socket, Server as SocketServer } from 'socket.io';
-import { onDisconnecting, onTest } from '../presentation/common/connection.controller';
+import { onConnectError, onDisconnect, onDisconnecting, onTest } from '../presentation/common/connection.controller';
 import { onEventInGameRealTimeScoreGet, onEventInGameRealTimeScorePost } from '../presentation/event/event.ingame.controller';
 import { onLobbyResetUserList, onLobbyStartGame, onLobbyUserCountGet, onLobbyUserListGet } from '../presentation/event/event.lobby.controller';
 import { onEventRoomChangeMode, onEventRoomCreate, onEventRoomEnter, onEventRoomHostReEnter } from '../presentation/event/event.room.controller';
@@ -65,6 +65,8 @@ export function initializeSocket(socketServer: SocketServer): void {
     // NORMAL APP
     // CONNECTION
     onDisconnecting(socketServer, socket);
+    onDisconnect(socketServer, socket);
+    onConnectError(socketServer, socket);
 
     // ROOM
     onRoomCreate(socketServer, socket);
