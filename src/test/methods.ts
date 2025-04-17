@@ -70,14 +70,14 @@ export async function listenAllEvents(hostSocket: Socket, clientSockets: Socket[
         socket.on("test.realtimescore", (data: any) => {
             socket.emit('event.ingame.realTimeScore.post', {
                 "score": Math.floor(Math.random() * 200),
-                "match": 1
+                "match": data.match
             });
         });
 
         socket.on("test.finalscore", (data: any) => {
             socket.emit('event.finish.score.post', {
                 "score": Math.floor(Math.random() * 500),
-                "match": 1
+                "match": data.match
             });
         });
 

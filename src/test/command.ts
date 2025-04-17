@@ -1,10 +1,10 @@
 import { RoomMode } from "../common/enums/enums";
 
-export const TARGET = 'http://localhost:9442';
+export const TARGET = 'https://app2.tenten.games:9443';
 export const TOTAL_CLIENTS = 1000; // 원하는 동시 접속자 수
-export const ROOM_NUMBER = '00000000';
-export const TEAM_1_ID = 824;
-export const TEAM_2_ID = 825;
+export const ROOM_NUMBER = '57631741';
+export const TEAM_1_ID = 778;
+export const TEAM_2_ID = 779;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 export const CREATE_ROOM_EMIT = 'event.room.create';

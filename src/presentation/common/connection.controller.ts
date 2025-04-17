@@ -57,10 +57,10 @@ export function onTest(
 ): void {
   // test. 으로 시작하는 모든건 모든 방에 전송
   socket.on('test.emit.realtimescore', (data: any) => {
-    socketServer.to(getEventHostSocketDataRoomNumber(socket)).emit('test.realtimescore');
+    socketServer.to(getEventHostSocketDataRoomNumber(socket)).emit('test.realtimescore', JSON.stringify(data));
   });
 
   socket.on("test.emit.finalscore", (data: any) => {
-    socketServer.to(getEventHostSocketDataRoomNumber(socket)).emit('test.finalscore');
+    socketServer.to(getEventHostSocketDataRoomNumber(socket)).emit('test.finalscore', JSON.stringify(data));
   });
 }
