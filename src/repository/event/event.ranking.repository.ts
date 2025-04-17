@@ -58,7 +58,7 @@ export async function processRankingsNoTotalRankings(
             }));
     }
 
-    let winTeamId = teamIds[0];
+    let winTeamId = 0;
     let maxAverageScore = -Infinity;
     for (const ts of teamScore) { // 무승부일 경우도 처리
         if (ts.averageScore > maxAverageScore) {
