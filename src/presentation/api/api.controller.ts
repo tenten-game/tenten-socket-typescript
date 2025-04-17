@@ -13,6 +13,10 @@ export function initializeHttp(app: Application): void {
   app.get('/rooms', async function (req: Request, res: Response): Promise<void> {
     const roomNumber: string = req.query.number as string;
     const eventRoomString: string | null  = await redisClient.get(`${roomNumber}`);
+    if (!eventRoomString) {
+      res.status(404).send({ error: true, message: 'ROOM NOT FOUND' });
+      return;
+    }
     res.send(eventRoomString);
   });
 
