@@ -103,7 +103,7 @@ export async function checkIfRoomCreated(): Promise<void> {
 
 export async function usersEmitEnterRoom(clientSockets: Socket[]): Promise<void> {
     let i = 1;
-    const random = Math.floor(Math.random() * 1000000) + 1;
+    const random = Math.floor(Math.random() * 10000000) + 1;
     for (const clientSocket of clientSockets) {
         clientSocket.emit(ENTER_ROOM_EMIT, ENTER_ROOM_REQUEST(i + random));
         i++;

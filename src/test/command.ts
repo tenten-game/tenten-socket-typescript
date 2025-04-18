@@ -2,7 +2,7 @@ import { RoomMode } from "../common/enums/enums";
 
 export const TARGET = 'https://app2.tenten.games:9443';
 export const TOTAL_CLIENTS = 400; // 원하는 동시 접속자 수
-export const ROOM_NUMBER = '';
+export const ROOM_NUMBER = '24775326';
 export const TEAM_1_ID = 778;
 export const TEAM_2_ID = 779;
 
