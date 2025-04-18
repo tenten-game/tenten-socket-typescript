@@ -51,6 +51,7 @@ export function initializeSocket(socketServer: SocketServer): void {
   socketServer.on('connection', async (socket: Socket): Promise<void> => {
     // 받는것 로깅
     console.log(`[SOCKET] ${socket.id} connected, env: ${config.env}`);
+    console.log(`[SOCKET] ${socket.id} connected, IP: ${socket.handshake.address}, UA: ${socket.handshake.headers['user-agent']}`);
     if (config.env === 'development') {
       socket.onAny((event, ...args) => logger.debug(`[ON] Socket Event: ${event}, Args: ${JSON.stringify(args)}`));
       socket.onAnyOutgoing((event, ...args) => logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}`));
