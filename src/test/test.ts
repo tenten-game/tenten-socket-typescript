@@ -5,9 +5,9 @@ import { checkIfChangedMode, checkIfEnterRoom, checkIfHostUserCount, checkIfHost
 
 (async function runTest() {
   console.log("시작")
-  // const clientSockets: Socket[] = await createClients();
-  // await listenAllEvents(clientSockets[0], clientSockets);
-  // await usersEmitEnterRoom(clientSockets);
+  const clientSockets: Socket[] = await createClients();
+  await listenAllEvents(clientSockets[0], clientSockets);
+  await usersEmitEnterRoom(clientSockets);
 
   // console.log("소켓 생성 및 REDIS 초기화")
   // const hostSocket: Socket = await createHost();
