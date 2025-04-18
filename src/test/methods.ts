@@ -1,3 +1,4 @@
+import { EventFinishScoreGetRequest } from "../application/event/dto/event.finish.dto";
 import { RoomMode } from "../common/enums/enums";
 import { redisClient } from "../config/redis.config";
 import { CREATE_ROOM_EMIT, CREATE_ROOM_ON, CREATE_ROOM_REQUEST, CREATE_ROOM_VALID_KEY, ENTER_ROOM_EMIT, ENTER_ROOM_ON, ENTER_ROOM_REQUEST, ENTER_ROOM_VALID_KEY, HOST_ROOM_CHANGE_MODE_EMIT, HOST_ROOM_CHANGE_MODE_ON, HOST_ROOM_CHANGE_MODE_REQUEST, HOST_ROOM_CHANGE_MODE_VALID_KEY, ROOM_NUMBER, TARGET, TOTAL_CLIENTS } from "./command";
@@ -68,16 +69,18 @@ export async function listenAllEvents(hostSocket: Socket, clientSockets: Socket[
         });
 
         socket.on("test.realtimescore", (data: any) => {
+            const request: EventFinishScoreGetRequest = typeof data === 'string' ? JSON.parse(data) : data;
             socket.emit('event.ingame.realTimeScore.post', {
                 "score": Math.floor(Math.random() * 200),
-                "match": data.match
+                "match": request.match
             });
         });
 
         socket.on("test.finalscore", (data: any) => {
+            const request: EventFinishScoreGetRequest = typeof data === 'string' ? JSON.parse(data) : data;
             socket.emit('event.finish.score.post', {
                 "score": Math.floor(Math.random() * 500),
-                "match": data.match
+                "match": request.match
             });
         });
 

@@ -1,8 +1,8 @@
 import { RoomMode } from "../common/enums/enums";
 
 export const TARGET = 'https://app2.tenten.games:9443';
-export const TOTAL_CLIENTS = 1000; // 원하는 동시 접속자 수
-export const ROOM_NUMBER = '57631741';
+export const TOTAL_CLIENTS = 2000; // 원하는 동시 접속자 수
+export const ROOM_NUMBER = '55676071';
 export const TEAM_1_ID = 778;
 export const TEAM_2_ID = 779;
 
@@ -54,8 +54,8 @@ export function ENTER_ROOM_REQUEST(idx: number): string {
 	return JSON.stringify({
 		"user": {
 			"i": idx, // user id
-			"a": 0, // arcade icon id
-			"f": 0, // family icon id
+			"a": 14, // arcade icon id
+			"f": 15, // family icon id
 			"t": Math.random() < 0.5 ? TEAM_1_ID : TEAM_2_ID,
 			"n": "NICKNAME_"+idx // nickname
 		},
