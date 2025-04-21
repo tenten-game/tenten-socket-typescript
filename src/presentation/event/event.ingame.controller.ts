@@ -13,7 +13,7 @@ export function onEventInGameRealTimeScorePost(
     // const request: RealTimeScorePostRequest = typeof req === 'string' ? JSON.parse(req) : req;
     // handleEventInGameRealTimeScorePost(request, getSocketDataRoomNumber(socket), getSocketDataUser(socket).t);
     const room: Room = await getRoom(getSocketDataRoomNumber(socket))
-    _socketServer.to(room.hostSocketId).emit('event.ingame.realTimeScore.got', req);
+    _socketServer.to(room.hostSocketId).emit('event.ingame.realTimeScore.got', JSON.stringify(req));
   });
 }
 
@@ -22,7 +22,6 @@ export function onEventInGameRealTimeScoreGet(
   socket: Socket
 ): void {
   socket.on('event.ingame.realTimeScore.get', async (req: any): Promise<void> => {
-    console.log('event.ingame.realTimeScore.get', req);
     // const request: RealTimeScoreGetRequest = typeof req === 'string' ? JSON.parse(req) : req;
     // const response: RealTimeScoreGetResponse = await handleEventInGameRealTimeScoreGet(request, getSocketDataRoomNumber(socket));
     // socket.emit('event.ingame.realTimeScore.got', JSON.stringify(response)); // 나한테만 쏘기
