@@ -19,7 +19,7 @@ export function expireRoomRelatedInfo(roomNumber: string): void {
         }
         if (!keys) return;
         keys.forEach((key) => {
-            redisClient.expire(key, 100);
+            redisClient.expire(key, 1000);
         });
     });
 }

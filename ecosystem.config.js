@@ -9,12 +9,14 @@ module.exports = {
             watch: false,
             max_memory_restart: '2G',
             env: {
+                NODE_OPTIONS: "--max-old-space-size=4096",
                 NODE_ENV: 'development',
             },
             env_local: {
                 NODE_ENV: 'local',
             },
             env_test: {
+                NODE_OPTIONS: "--max-old-space-size=4096",
                 NODE_ENV: 'test',
             },
             env_production: {
