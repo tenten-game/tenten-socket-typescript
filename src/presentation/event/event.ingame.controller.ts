@@ -12,7 +12,8 @@ export function onEventInGameRealTimeScorePost(
   socket.on('event.ingame.realTimeScore.post', async (req: any): Promise<void> => {
     // const request: RealTimeScorePostRequest = typeof req === 'string' ? JSON.parse(req) : req;
     // handleEventInGameRealTimeScorePost(request, getSocketDataRoomNumber(socket), getSocketDataUser(socket).t);
-    const room: Room = await getRoom(getSocketDataRoomNumber(socket))
+    const room: Room = await getRoom(getSocketDataRoomNumber(socket));
+    req.teamId = getSocketDataUser(socket).t;
     _socketServer.to(room.hostSocketId).emit('event.ingame.realTimeScore.got', JSON.stringify(req));
   });
 }
