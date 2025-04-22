@@ -50,8 +50,8 @@ export function onEventRoomEnter(
   socket.on('event.room.enter', async (req: any): Promise<void> => {
     const request: EventRoomEnterRequest = typeof req === 'string' ? JSON.parse(req) : req;
     socket.join(request.roomNumber);
-    setSocketDataUserAndRoomNumber(socket, request.user, request.roomNumber, SocketDataType.EVENT_USER);
     const hostSocketId: string = await handleEventRoomEnterAndGetHostSocketId(request);
+    setSocketDataUserAndRoomNumber(socket, request.user, request.roomNumber, hostSocketId, SocketDataType.EVENT_USER);
     _socketServer.to(hostSocketId).emit('event.room.entered', JSON.stringify(request.user));
     socket.emit('event.room.entered');
   });

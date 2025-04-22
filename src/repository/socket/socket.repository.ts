@@ -7,12 +7,14 @@ export function setSocketDataUserAndRoomNumber(
   socket: Socket,
   user: User,
   roomNumber: string,
+  hostSocketId: string,
   socketDataType: SocketDataType,
 ): void {
   const socketData: SocketData = socket.data;
   socketData.user = user;
   socketData.roomNumber = roomNumber;
   socketData.socketDataType = socketDataType;
+  socketData.hostSocketId = hostSocketId;
 }
 
 export function getSocketDataUser(

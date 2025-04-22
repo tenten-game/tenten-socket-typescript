@@ -5,6 +5,7 @@ export class SocketData {
     constructor(
         public user: User, 
         public roomNumber: string,
+        public hostSocketId: string,
         public socketDataType: SocketDataType = SocketDataType.NORMAL_USER,
     ) { }
 }
