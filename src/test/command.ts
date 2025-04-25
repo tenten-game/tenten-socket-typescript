@@ -54,10 +54,10 @@ export function ENTER_ROOM_REQUEST(idx: number): string {
 	return JSON.stringify({
 		"user": {
 			"i": idx, // user id
-			"a": 14, // arcade icon id
-			"f": 15, // family icon id
+			"a": Math.floor(Math.random() * (46 - 14 + 1)) + 14, // avatar id
+			"f": Math.floor(Math.random() * (46 - 14 + 1)) + 14, // avatar id
 			"t": Math.random() < 0.5 ? TEAM_1_ID : TEAM_2_ID,
-			"n": "NICKNAME_"+idx // nickname
+			"n": "닉넴_"+idx // nickname
 		},
 		"roomNumber": ROOM_NUMBER,
 	});
