@@ -70,10 +70,13 @@ export async function listenAllEvents(hostSocket: Socket, clientSockets: Socket[
 
         socket.on("test.realtimescore", (data: any) => {
             const request: EventFinishScoreGetRequest = typeof data === 'string' ? JSON.parse(data) : data;
-            socket.emit('event.ingame.realTimeScore.post', {
-                "score": Math.floor(Math.random() * 200),
-                "match": request.match
-            });
+            const delay = Math.random() * 400 + 800; // 800ms ~ 1200ms
+            setTimeout(() => {
+                socket.emit('event.ingame.realTimeScore.post', {
+                    "score": Math.floor(Math.random() * 200),
+                    "match": request.match
+                });
+            }, delay);
         });
 
         socket.on("test.finalscore", (data: any) => {
