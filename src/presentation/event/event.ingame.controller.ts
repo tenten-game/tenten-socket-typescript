@@ -10,9 +10,8 @@ export function onEventInGameRealTimeScorePost(
   socket: Socket
 ): void {
   socket.on('event.ingame.realTimeScore.post', async (req: any): Promise<void> => {
-    req.teamId = getSocketDataUser(socket).t;
-    const room: Room = await getRoom(getSocketDataRoomNumber(socket));
-    _socketServer.to(room.hostSocketId).emit('event.ingame.realTimeScore.got', JSON.stringify(req));
+    const request: RealTimeScorePostRequest = typeof req === 'string' ? JSON.parse(req) : req;
+    handleEventInGameRealTimeScorePost(request, getSocketDataRoomNumber(socket), getSocketDataUser(socket).t);
   });
 }
 
@@ -21,8 +20,8 @@ export function onEventInGameRealTimeScoreGet(
   socket: Socket
 ): void {
   socket.on('event.ingame.realTimeScore.get', async (req: any): Promise<void> => {
-    // const request: RealTimeScoreGetRequest = typeof req === 'string' ? JSON.parse(req) : req;
-    // const response: RealTimeScoreGetResponse = await handleEventInGameRealTimeScoreGet(request, getSocketDataRoomNumber(socket));
-    // socket.emit('event.ingame.realTimeScore.got', JSON.stringify(response)); // 나한테만 쏘기
+    const request: RealTimeScoreGetRequest = typeof req === 'string' ? JSON.parse(req) : req;
+    const response: RealTimeScoreGetResponse = await handleEventInGameRealTimeScoreGet(request, getSocketDataRoomNumber(socket));
+    socket.emit('event.ingame.realTimeScore.got', JSON.stringify(response)); // 나한테만 쏘기
   });
 }
