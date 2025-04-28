@@ -1,5 +1,5 @@
 import { Socket, Server as SocketServer } from 'socket.io';
-import { getSocketDataRoomNumber, getSocketDataUser, getSocketDataUserId, setSocketDataUserAndRoomNumber } from '../../repository/socket/socket.repository';
+import { getEventHostSocketDataRoomNumber, getSocketDataRoomNumber, getSocketDataUser, getSocketDataUserId, setSocketDataUserAndRoomNumber } from '../../repository/socket/socket.repository';
 import { RoomChangeModeRequest, RoomNumberRequest } from '../../common/dto/room.dto';
 import { handleRoomChangeMode, handleRoomCreate, handleRoomEnter } from '../../application/normal/room.service';
 
@@ -46,5 +46,15 @@ export function onRoomExit(
   socket.on('room.enter', async (req: any): Promise<void> => {
     const room: RoomNumberRequest = typeof req === 'string' ? JSON.parse(req) : req;
     socket.data.room = room.roomNumber;
+  });
+}
+
+export function onInGameCommandDepreacted(
+  _socketServer: SocketServer,
+  socket: Socket
+): void {
+  socket.on('inGameCommand', async (req: any): Promise<void> => {
+    const roomNumber = getEventHostSocketDataRoomNumber(socket);
+    _socketServer.to(roomNumber).emit('inGameCommand', JSON.stringify(req));
   });
 }

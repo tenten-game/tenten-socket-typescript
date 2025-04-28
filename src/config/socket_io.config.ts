@@ -6,7 +6,7 @@ import { onEventInGameRealTimeScoreGet, onEventInGameRealTimeScorePost } from '.
 import { onLobbyResetUserList, onLobbyStartGame, onLobbyUserCountGet, onLobbyUserListGet } from '../presentation/event/event.lobby.controller';
 import { onEventRoomChangeMode, onEventRoomCreate, onEventRoomEnter, onEventRoomHostReEnter } from '../presentation/event/event.room.controller';
 import { onEventFinishExit, onEventFinishRankingGet, onEventFinishScoreGet, onEventFinishScorePost } from '../presentation/event/evnet.finish.controller';
-import { onRoomChangeMode, onRoomCreate, onRoomEnter, onRoomExit } from '../presentation/normal/room.controller';
+import { onInGameCommandDepreacted, onRoomChangeMode, onRoomCreate, onRoomEnter, onRoomExit } from '../presentation/normal/room.controller';
 import { logger } from '../util/logger';
 import { config } from './env.config';
 import { redisAdapter } from "./redis.config";
@@ -90,6 +90,7 @@ export function initializeSocket(socketServer: SocketServer): void {
     // onInGameScore(socketServer, socket);
 
     // BYPASS
+    onInGameCommandDepreacted(socketServer, socket);
 
     /**
      * EVENT
