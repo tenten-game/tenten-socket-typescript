@@ -6,7 +6,7 @@ export class Room {
         public hostSocketId: string,
         public master: number = 0,
         public starter: number = 0,
-        public mode: RoomMode = RoomMode.SOLO,
+        public mode: RoomMode = RoomMode.INDIVIDUAL,
         public event: Event | null = null,
     ) { }
 }

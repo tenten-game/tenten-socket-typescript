@@ -1,5 +1,5 @@
 export enum RoomMode {
-    SOLO = 'SOLO',
+    INDIVIDUAL = 'INDIVIDUAL',
     TEAM = 'TEAM',
 }
 
