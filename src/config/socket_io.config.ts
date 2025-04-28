@@ -2,11 +2,11 @@ import { instrument } from '@socket.io/admin-ui';
 import { Server as HttpServer } from "http";
 import { Socket, Server as SocketServer } from 'socket.io';
 import { onConnectError, onDisconnect, onDisconnecting, onTest } from '../presentation/common/connection.controller';
-import { onEventInGameRealTimeScoreGet, onEventInGameRealTimeScorePost } from '../presentation/event/event.ingame.controller';
+import { onEventInGameRealTimeScoreGet, onEventInGameRealTimeScorePost, onEventInGameSendSeed } from '../presentation/event/event.ingame.controller';
 import { onLobbyResetUserList, onLobbyStartGame, onLobbyUserCountGet, onLobbyUserListGet } from '../presentation/event/event.lobby.controller';
 import { onEventRoomChangeMode, onEventRoomCreate, onEventRoomEnter, onEventRoomHostReEnter } from '../presentation/event/event.room.controller';
 import { onEventFinishExit, onEventFinishRankingGet, onEventFinishScoreGet, onEventFinishScorePost } from '../presentation/event/evnet.finish.controller';
-import { onInGameCommandDepreacted, onRoomChangeMode, onRoomCreate, onRoomEnter, onRoomExit } from '../presentation/normal/room.controller';
+import { onRoomChangeMode, onRoomCreate, onRoomEnter, onRoomExit } from '../presentation/normal/room.controller';
 import { logger } from '../util/logger';
 import { config } from './env.config';
 import { redisAdapter } from "./redis.config";
@@ -89,8 +89,6 @@ export function initializeSocket(socketServer: SocketServer): void {
     // onInGameTouch(socketServer, socket);
     // onInGameScore(socketServer, socket);
 
-    // BYPASS
-    onInGameCommandDepreacted(socketServer, socket);
 
     /**
      * EVENT
@@ -111,6 +109,7 @@ export function initializeSocket(socketServer: SocketServer): void {
     // IN_GAME
     onEventInGameRealTimeScorePost(socketServer, socket);
     onEventInGameRealTimeScoreGet(socketServer, socket);
+    onEventInGameSendSeed(socketServer, socket);
 
     // FINISH - WEB
     onEventFinishScoreGet(socketServer, socket);

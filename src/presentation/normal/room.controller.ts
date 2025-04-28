@@ -48,13 +48,3 @@ export function onRoomExit(
     socket.data.room = room.roomNumber;
   });
 }
-
-export function onInGameCommandDepreacted(
-  _socketServer: SocketServer,
-  socket: Socket
-): void {
-  socket.on('inGameCommand', async (req: any): Promise<void> => {
-    const roomNumber = getEventHostSocketDataRoomNumber(socket);
-    _socketServer.to(roomNumber).emit('inGameCommand', JSON.stringify(req));
-  });
-}
