@@ -26,4 +26,16 @@ export function initializeHttp(app: Application): void {
     res.send(await redisClient.get(`${roomNumber}_${match}_RANKING_RESULT`) || '{}');
   });
 
+  app.delete('/room-codes/:roomId', async function (req: Request, res: Response): Promise<void> {
+    const roomId: string = req.params.roomId;
+    const keys: string[] = await redisClient.keys(`${roomId}*`);
+    const pipeline = redisClient.pipeline();
+    keys.forEach((key) => {
+      pipeline.del(key);
+    });
+    await pipeline.exec();
+    // 방 삭제 완료
+    res.send({ message: 'Room deleted successfully' });
+  });
+
 }

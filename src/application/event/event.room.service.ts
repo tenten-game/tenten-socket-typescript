@@ -23,8 +23,16 @@ export async function handleEventRoomChangeMode(request: EventRoomChangeModeRequ
 }
 
 export async function handleEventRoomEnterAndGetHostSocketId(request: EventRoomEnterRequest): Promise<string> {
-    addUser(request.roomNumber, request.user);
     const room: Room = await getRoom(request.roomNumber);
+    const teamIds = room.event!.eventTeams.map((team) => team.id);
+
+    // teamId 오류라면 랜덤 팀 지정
+    if (!teamIds.includes(request.user.t)) {
+        const randomIndex = Math.floor(Math.random() * 2); // 0 or 1
+        request.user.t = teamIds[randomIndex];
+    }
+
+    addUser(request.roomNumber, request.user);
     return room.hostSocketId
 }
 
