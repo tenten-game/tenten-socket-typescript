@@ -35,7 +35,7 @@ export function initializeHttp(app: Application): void {
       const room = await getRoom(roomNumber);
       const ranking: ProcessRankingsResult = await processRankingsNoTotalRankings(roomNumber, matchNumber, room.event?.eventTeams.map((team) => team.id) || []);
       console.log(JSON.stringify(ranking));
-      res.send(`if = ${JSON.stringify(ranking)}`);
+      res.send(JSON.stringify(ranking));
     } else {
       console.log(`result = ${result}`);
       res.send(result);
