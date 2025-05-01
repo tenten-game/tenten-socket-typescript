@@ -3,6 +3,7 @@ import { redisClient } from "../../config/redis.config";
 import { getRoom } from '../../repository/common/room.repository';
 import { ProcessRankingsResult } from '../../repository/event/entity/rankings.entity';
 import { processRankingsNoTotalRankings } from '../../repository/event/event.ranking.repository';
+import axios from 'axios';
 
 export function initializeHttp(app: Application): void {
 
@@ -28,16 +29,29 @@ export function initializeHttp(app: Application): void {
     const match: string = req.query.match as string;
     const matchNumber = parseInt(match);
     const result = await redisClient.get(`${roomNumber}_${match}_RANKING_RESULT`) || '';
-    console.log(`roomNumber = ${roomNumber}`);
-    console.log(`matchNumber = ${matchNumber}`);
-    console.log(`result = ${result}`);
     if (result == '') {
       const room = await getRoom(roomNumber);
       const ranking: ProcessRankingsResult = await processRankingsNoTotalRankings(roomNumber, matchNumber, room.event?.eventTeams.map((team) => team.id) || []);
-      console.log(JSON.stringify(ranking));
+      
+      const bodyData = ranking.teamScore.map((teamScore) => {
+        return {
+          teamId: teamScore.id,
+          totalUserScore: teamScore.averageScore,
+        };
+      });
+      
+      // backup/events/{eventId}/matches/{matchId}/team-scores 으로 POST
+      await axios.post(`https://lb5.tenten.games/v1/backup/matches/${matchNumber}/team-scores`,
+        bodyData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
       res.send(JSON.stringify(ranking));
     } else {
-      console.log(`result = ${result}`);
       res.send(result);
     }
   });
