@@ -1,5 +1,8 @@
 import { Application, Request, Response } from 'express';
 import { redisClient } from "../../config/redis.config";
+import { getRoom } from '../../repository/common/room.repository';
+import { ProcessRankingsResult } from '../../repository/event/entity/rankings.entity';
+import { processRankingsNoTotalRankings } from '../../repository/event/event.ranking.repository';
 
 export function initializeHttp(app: Application): void {
 
@@ -23,7 +26,15 @@ export function initializeHttp(app: Application): void {
   app.get('/match-results', async function (req: Request, res: Response): Promise<void> {
     const roomNumber: string = req.query.room as string;
     const match: string = req.query.match as string;
-    res.send(await redisClient.get(`${roomNumber}_${match}_RANKING_RESULT`) || '{}');
+    const matchNumber = parseInt(match);
+    const result = await redisClient.get(`${roomNumber}_${match}_RANKING_RESULT`) || '';
+    if (result == '') {
+      const room = await getRoom(roomNumber);
+      const ranking: ProcessRankingsResult = await processRankingsNoTotalRankings(roomNumber, matchNumber, room.event?.eventTeams.map((team) => team.id) || []);
+      res.send(JSON.stringify(ranking));
+    } else {
+      res.send(result);
+    }
   });
 
   app.delete('/room-codes/:roomId', async function (req: Request, res: Response): Promise<void> {
