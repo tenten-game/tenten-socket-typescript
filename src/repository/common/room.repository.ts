@@ -6,6 +6,8 @@ export function setRoom(roomNumber: string, room: Room): void {
 }
 
 export async function getRoom(roomNumber: string): Promise<Room> {
+    const roomKey = generateRoomKey(roomNumber);
+    console.log(`getRoom: roomKey = ${roomKey}`);
     const room: string | null = await redisClient.get(generateRoomKey(roomNumber));
     if (!room) throw Error('Event room not found');
     return JSON.parse(room);

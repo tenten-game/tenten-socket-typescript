@@ -28,6 +28,9 @@ export function initializeHttp(app: Application): void {
     const match: string = req.query.match as string;
     const matchNumber = parseInt(match);
     const result = await redisClient.get(`${roomNumber}_${match}_RANKING_RESULT`) || '';
+    console.log(`roomNumber = ${roomNumber}`);
+    console.log(`matchNumber = ${matchNumber}`);
+    console.log(`result = ${result}`);
     if (result == '') {
       const room = await getRoom(roomNumber);
       const ranking: ProcessRankingsResult = await processRankingsNoTotalRankings(roomNumber, matchNumber, room.event?.eventTeams.map((team) => team.id) || []);
