@@ -3,7 +3,6 @@ import { redisClient } from "../../config/redis.config";
 export function addRealTimeScore(roomNumber: string, match: number, teamId: number, score: number): void {
     const roomKey = generateRoomKey(roomNumber, match, teamId);
     redisClient.incrby(roomKey, score);
-    redisClient.expire(roomKey, 1000);
 }
 
 export async function getRealTimeScore(roomNumber: string, match: number, teamId: number): Promise<number> {

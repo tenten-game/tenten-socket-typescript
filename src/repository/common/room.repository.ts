@@ -12,19 +12,6 @@ export async function getRoom(roomNumber: string): Promise<Room> {
     return JSON.parse(room);
 }
 
-export function expireRoomRelatedInfo(roomNumber: string): void {
-    redisClient.keys(generateRoomKey(roomNumber) + "*", (err, keys) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
-        if (!keys) return;
-        keys.forEach((key) => {
-            redisClient.expire(key, 1000);
-        });
-    });
-}
-
 function generateRoomKey(roomNumber: string): string {
     return `${roomNumber}`;
 }
