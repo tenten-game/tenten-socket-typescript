@@ -11,9 +11,7 @@ export function onLobbyStartGame(
   socket.on('event.lobby.startGame', async (req: any): Promise<void> => {
     const request: EventLobbyStartGameRequest = typeof req === 'string' ? JSON.parse(req) : req;
     const roomNumber = getSocketDataRoomNumber(socket);
-    for (let i = 0; i < 1000; i++) {
-      _socketServer.to(roomNumber).emit('event.lobby.startedGame', JSON.stringify(request)); // 방에 있는 모든 사람에게 쏘기
-    }
+    _socketServer.to(roomNumber).emit('event.lobby.startedGame', JSON.stringify(request)); // 방에 있는 모든 사람에게 쏘기
   });
 }
 
