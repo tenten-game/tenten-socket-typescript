@@ -2,7 +2,7 @@ module.exports = {
     apps: [
         {
             name: 'socket-test',
-            script: 'dist/test/test.js',
+            script: 'dist/test2/test2.js',
             exec_mode: 'cluster', //
             instances: 5,
             watch: false,
