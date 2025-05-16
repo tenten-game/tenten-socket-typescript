@@ -141,6 +141,9 @@ export async function zRevRank(
 ): Promise<number> {
     const rankingKey = generateKey(roomNumber, match) + "_CALCULATED";
     const ranking: string = (await redisClient.zscore(rankingKey, JSON.stringify(user))) || "-1";
+    if (ranking === "-1") {
+        throw Error(`$i: {user.i} match: ${match}`);
+    }
     return parseInt(ranking);
 }
 
