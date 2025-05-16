@@ -25,35 +25,37 @@ export function initializeHttp(app: Application): void {
   });
 
   app.get('/match-results', async function (req: Request, res: Response): Promise<void> {
-    const roomNumber: string = req.query.room as string;
-    const match: string = req.query.match as string;
-    const matchNumber = parseInt(match);
-    const result = await redisClient.get(`${roomNumber}_${match}_RANKING_RESULT`) || '';
-    if (result == '') {
-      const room = await getRoom(roomNumber);
-      const ranking: ProcessRankingsResult = await processRankingsNoTotalRankings(roomNumber, matchNumber, room.event?.eventTeams.map((team) => team.id) || []);
+    // 404 띄우기
+    res.send({ error: true, message: 'NOT IMPLEMENTED' });
+    // const roomNumber: string = req.query.room as string;
+    // const match: string = req.query.match as string;
+    // const matchNumber = parseInt(match);
+    // const result = await redisClient.get(`${roomNumber}_${match}_RANKING_RESULT`) || '';
+    // if (result == '') {
+    //   const room = await getRoom(roomNumber);
+    //   const ranking: ProcessRankingsResult = await processRankingsNoTotalRankings(roomNumber, matchNumber, room.event?.eventTeams.map((team) => team.id) || []);
       
-      const bodyData = ranking.teamScore.map((teamScore) => {
-        return {
-          teamId: teamScore.id,
-          totalUserScore: teamScore.averageScore,
-        };
-      });
+    //   const bodyData = ranking.teamScore.map((teamScore) => {
+    //     return {
+    //       teamId: teamScore.id,
+    //       totalUserScore: teamScore.averageScore,
+    //     };
+    //   });
       
-      // backup/events/{eventId}/matches/{matchId}/team-scores 으로 POST
-      await axios.post(`https://lb5.tenten.games/v1/backup/matches/${matchNumber}/team-scores`,
-        bodyData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+    //   // backup/events/{eventId}/matches/{matchId}/team-scores 으로 POST
+    //   await axios.post(`https://lb5.tenten.games/v1/backup/matches/${matchNumber}/team-scores`,
+    //     bodyData,
+    //     {
+    //       headers: {
+    //         'Content-Type': 'application/json',
+    //       },
+    //     }
+    //   );
 
-      res.send(JSON.stringify(ranking));
-    } else {
-      res.send(result);
-    }
+    //   res.send(JSON.stringify(ranking));
+    // } else {
+    //   res.send(result);
+    // }
   });
 
   app.delete('/room-codes/:roomId', async function (req: Request, res: Response): Promise<void> {
