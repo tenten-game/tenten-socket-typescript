@@ -147,10 +147,7 @@ export async function zRevRank(
         saveLogToFirestore(
             `NURAK`,
             `${user.i}_${user.t}_${roomNumber}_${match}_${random}`,
-            {
-                message: `Ranking not found for user: ${user.i} in room: ${roomNumber} match: ${match}`
-            }
-            
+            {},
         );
         throw Error(`$i: {user.i} match: ${match}`);
     }
