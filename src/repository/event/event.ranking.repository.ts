@@ -146,8 +146,13 @@ export async function zRevRank(
         const random = Math.floor(Math.random() * 1000000);
         saveLogToFirestore(
             `NURAK`,
-            `${user.i}_${user.t}_${roomNumber}_${match}_${random}`,
-            {},
+            `${user.i}_${random}`,
+            {
+                i: user.i,
+                t: user.t,
+                n: roomNumber,
+                m: match,
+            },
         );
         throw Error(`$i: {user.i} match: ${match}`);
     }
