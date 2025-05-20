@@ -7,7 +7,7 @@ export const saveLogToFirestore = async (
   message: any,
 ) => {
   const db = getFirestore();
-  message.timestamp = new Date();
+  message.timestamp = Date.now();
   try {
     await db
       .collection(collectionId)
