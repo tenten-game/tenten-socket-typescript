@@ -1,6 +1,7 @@
 import { TOP_N } from '../../common/const/const';
 import { User } from '../../common/entity/user.entity';
 import { redisClient } from '../../config/redis.config';
+import { saveLogToFirestore } from '../../util/firestore';
 import { ProcessRankingsResult, Ranking, RankingDTO, TeamScore } from './entity/rankings.entity';
 
 export async function processRankingsNoTotalRankings(
@@ -142,6 +143,12 @@ export async function zRevRank(
     const rankingKey = generateKey(roomNumber, match) + "_CALCULATED";
     const ranking: string = (await redisClient.zscore(rankingKey, JSON.stringify(user))) || "-1";
     if (ranking === "-1") {
+        const random = Math.floor(Math.random() * 1000000);
+        saveLogToFirestore(
+            `NURAK`,
+            `${user.i}_${user.t}_${roomNumber}_${match}_${random}`,
+            `Ranking not found for user: ${user.i} in room: ${roomNumber} match: ${match}`
+        );
         throw Error(`$i: {user.i} match: ${match}`);
     }
     return parseInt(ranking);
