@@ -1,13 +1,13 @@
 export const TARGET = 'https://app2.tenten.games:9443';
-export const ROOM_NUMBER = '83184170';
-export const TEAM_1_ID = 828;
-export const TEAM_2_ID = 829;
-export const TOTAL_CLIENTS = 1000 / 5; // 원하는 동시 접속자 수
+export const ROOM_NUMBER = '49634821';
+export const TEAM_1_ID = 834;
+export const TEAM_2_ID = 835;
+export const TOTAL_CLIENTS = 100 / 5; // 원하는 동시 접속자 수
 const TOTAL_TIME = 1 * 60 * 1000; // N분
-const REAL_TIME_SCORE_PER_SECOND_MIN = 6; // 0 ~ N 
-const REAL_TIME_SCORE_PER_SECOND_MAX = 14; // 0 ~ N 
-const FINAL_SCORE_MIN = 60; // 0 ~ 80
-const FINAL_SCORE_MAX = 120; // 0 ~ 80
+const REAL_TIME_SCORE_PER_SECOND_MIN = 1; // 0 ~ N 
+const REAL_TIME_SCORE_PER_SECOND_MAX = 4; // 0 ~ N 
+const FINAL_SCORE_MIN = 30; // 0 ~ 80
+const FINAL_SCORE_MAX = 60; // 0 ~ 80
 
 export function ENTER_ROOM_REQUEST(idx: number): string {
 	return JSON.stringify({
