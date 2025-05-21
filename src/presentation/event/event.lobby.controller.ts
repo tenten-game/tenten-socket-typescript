@@ -17,7 +17,7 @@ export function onLobbyStartGame(
       request.match,
       request.isPractice,
       new Date().getTime(),
-      10000,
+      11000,
     )
     
     setTimeout(() => {
