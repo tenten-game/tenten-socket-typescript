@@ -1,5 +1,5 @@
 import { Socket, Server as SocketServer } from "socket.io";
-import { EventLobbyStartGameRequest } from "../../application/event/dto/event.lobby.dto";
+import { EventLobbyStartGameRequest, EventLobbyStartGameResponse } from "../../application/event/dto/event.lobby.dto";
 import { handleEventLobbyUserListReset, handleLobbyUserCountGet, handleLobbyUserListGet, handleShuffleTeam } from "../../application/event/event.lobby.service";
 import { getSocketDataRoomNumber } from "../../repository/socket/socket.repository";
 import { UserCount } from "../../repository/common/dto/userCount.dto";
@@ -11,7 +11,15 @@ export function onLobbyStartGame(
   socket.on('event.lobby.startGame', async (req: any): Promise<void> => {
     const request: EventLobbyStartGameRequest = typeof req === 'string' ? JSON.parse(req) : req;
     const roomNumber = getSocketDataRoomNumber(socket);
-    _socketServer.to(roomNumber).emit('event.lobby.startedGame', JSON.stringify(request)); // 방에 있는 모든 사람에게 쏘기
+
+    const response: EventLobbyStartGameResponse = new EventLobbyStartGameResponse(
+      request.gameNumber,
+      request.match,
+      request.isPractice,
+      new Date().getTime(),
+    )
+    
+    _socketServer.to(roomNumber).emit('event.lobby.startedGame', JSON.stringify(response)); // 방에 있는 모든 사람에게 쏘기
   });
 }
 
