@@ -12,5 +12,6 @@ export class EventLobbyStartGameResponse {
         public match: number,
         public isPractice: boolean,
         public startTime: number,
+        public gap: number,
     ) { }
 }
