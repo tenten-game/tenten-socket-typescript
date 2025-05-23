@@ -170,7 +170,7 @@ export function storeRankingGetLog(
     match: number,
     user: User,
 ): void {
-    const rankingKey = generateKey(roomNumber, match) + "GET_LOG";
+    const rankingKey = generateKey(roomNumber, match) + "_GET_LOG";
     redisClient.zadd(rankingKey, Date.now(), JSON.stringify(user));
 }
 
