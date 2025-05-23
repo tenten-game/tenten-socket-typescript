@@ -165,6 +165,14 @@ function generateKey(roomNumber: string, match: number): string {
     return `${roomNumber}_${match}_RANKING`;
 }
 
+export function storeRankingGetLog(
+    roomNumber: string,
+    match: number,
+    user: User,
+): void {
+    const rankingKey = generateKey(roomNumber, match) + "GET_LOG";
+    redisClient.zadd(rankingKey, Date.now(), JSON.stringify(user));
+}
 
 /*
 export async function processRankings(
