@@ -26,7 +26,7 @@ export function onLobbyStartGame(
 
     setTimeout(() => {
       _socketServer.to(roomNumber).emit('event.lobby.startedGame', JSON.stringify(response)); // 방에 있는 모든 사람에게 쏘기
-    }, 15 * 1000);
+    }, 30 * 1000);
   });
 }
 
