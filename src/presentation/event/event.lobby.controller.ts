@@ -22,10 +22,10 @@ export function onLobbyStartGame(
 
     // _socketServer.to(roomNumber).emit('event.lobby.startGame', JSON.stringify(response)); // 방에 있는 모든 사람에게 쏘기
 
-    socket.emit('event.lobby.startGame', JSON.stringify(response)); // 방에 있는 모든 사람에게 쏘기
+    socket.emit('event.lobby.startedGame', JSON.stringify(response)); // 방에 있는 모든 사람에게 쏘기
 
     setTimeout(() => {
-      _socketServer.to(roomNumber).emit('event.lobby.startGame', JSON.stringify(response)); // 방에 있는 모든 사람에게 쏘기
+      _socketServer.to(roomNumber).emit('event.lobby.startedGame', JSON.stringify(response)); // 방에 있는 모든 사람에게 쏘기
     }, 15 * 1000);
   });
 }
