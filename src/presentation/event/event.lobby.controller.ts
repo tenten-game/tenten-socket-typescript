@@ -3,6 +3,7 @@ import { EventLobbyStartGameRequest, EventLobbyStartGameResponse } from "../../a
 import { handleEventLobbyUserListReset, handleLobbyUserCountGet, handleLobbyUserListGet, handleShuffleTeam } from "../../application/event/event.lobby.service";
 import { getSocketDataRoomNumber } from "../../repository/socket/socket.repository";
 import { UserCount } from "../../repository/common/dto/userCount.dto";
+import { loggingTimeStamp } from "../../config/redis.config";
 
 export function onLobbyStartGame(
   _socketServer: SocketServer,
@@ -11,15 +12,9 @@ export function onLobbyStartGame(
   socket.on('event.lobby.startGame', async (req: any): Promise<void> => {
     const request: EventLobbyStartGameRequest = typeof req === 'string' ? JSON.parse(req) : req;
     const roomNumber = getSocketDataRoomNumber(socket);
-
-    const response: EventLobbyStartGameResponse = new EventLobbyStartGameResponse(
-      request.gameNumber,
-      request.match,
-      request.isPractice,
-      new Date().getTime(),
-      11000,
-    )
-
+    const now = Date.now();
+    const response = {...request, startTime: now, gap: 11000};
+    loggingTimeStamp(`${roomNumber}_LOG_START_GAME`);
     _socketServer.to(roomNumber).emit('event.lobby.startedGame', JSON.stringify(response)); // 방에 있는 모든 사람에게 쏘기
   });
 }
