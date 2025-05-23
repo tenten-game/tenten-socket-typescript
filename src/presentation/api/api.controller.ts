@@ -1,5 +1,5 @@
 import { Application, Request, Response } from 'express';
-import { redisClient } from "../../config/redis.config";
+import { loggingTimeStamp, redisClient } from "../../config/redis.config";
 import { getRoom } from '../../repository/common/room.repository';
 import { ProcessRankingsResult } from '../../repository/event/entity/rankings.entity';
 import { processRankingsNoTotalRankings } from '../../repository/event/event.ranking.repository';
@@ -65,6 +65,7 @@ export function initializeHttp(app: Application): void {
     const result = await redisClient.get(`${roomNumber}_${match}_RANKING_RESULT`) || '';
     if (result == '') {
       const room = await getRoom(roomNumber);
+      loggingTimeStamp(`${roomNumber}_${match}_LOG_RANKING_CALCULATE_BY_API`);
       const ranking: ProcessRankingsResult = await processRankingsNoTotalRankings(roomNumber, matchNumber, room.event?.eventTeams.map((team) => team.id) || []);
       
       const bodyData = ranking.teamScore.map((teamScore) => {

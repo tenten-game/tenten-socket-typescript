@@ -1,4 +1,5 @@
 import { User } from "../../common/entity/user.entity";
+import { loggingTimeStamp } from "../../config/redis.config";
 import { getRoom } from "../../repository/common/room.repository";
 import { ProcessRankingsResult } from "../../repository/event/entity/rankings.entity";
 import { processRankingsNoTotalRankings, zaddScore, zRevRank } from "../../repository/event/event.ranking.repository";
@@ -6,6 +7,7 @@ import { EventFinishScorePostRequest } from "./dto/event.finish.dto";
 
 export async function handleEventFinishScoreGet(roomNumber: string, match: number): Promise<ProcessRankingsResult> {
     const room = await getRoom(roomNumber);
+    loggingTimeStamp(`${roomNumber}_${match}_LOG_RANKING_CALCULATE_BY_SOCKET`);
     const ranking: ProcessRankingsResult = await processRankingsNoTotalRankings(roomNumber, match, room.event?.eventTeams.map((team) => team.id) || []);
     return ranking;
 }

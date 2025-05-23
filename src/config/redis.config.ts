@@ -15,3 +15,7 @@ export function installRedis(): void {
   redisClient.on('connect', () => {
   });
 }
+
+export function loggingTimeStamp(key: string): void {
+  redisClient.set(key, Date.now());
+}
