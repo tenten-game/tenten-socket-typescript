@@ -17,7 +17,7 @@ export function handleEventFinishScorePost(request: EventFinishScorePostRequest,
 }
 
 export async function handleEventFinishRankingGet(roomNumber: string, user: User, match: number): Promise<number> {
-    const myranking = await zRevRank(roomNumber, match, user);
     storeRankingGetLog(roomNumber, match, user);
+    const myranking = await zRevRank(roomNumber, match, user);
     return myranking;
 }

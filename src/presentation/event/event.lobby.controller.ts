@@ -13,7 +13,7 @@ export function onLobbyStartGame(
     const request: EventLobbyStartGameRequest = typeof req === 'string' ? JSON.parse(req) : req;
     const roomNumber = getSocketDataRoomNumber(socket);
     const now = Date.now();
-    const response = {...request, startTime: now, gap: 11000};
+    const response = {...request, startTime: now, gap: 11000, revisionTime: 800};
     loggingTimeStamp(`${roomNumber}_LOG_START_GAME`);
     _socketServer.to(roomNumber).emit('event.lobby.startedGame', JSON.stringify(response)); // 방에 있는 모든 사람에게 쏘기
   });

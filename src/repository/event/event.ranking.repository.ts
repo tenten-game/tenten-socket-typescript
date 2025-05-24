@@ -133,8 +133,9 @@ export function zaddScore(
 ): void {
     const rankingKey = generateKey(roomNumber, match);
     const now = Date.now();
-    const userWithTimestamp = { ...user, timestamp: now };
-    redisClient.zadd(rankingKey, score, JSON.stringify(userWithTimestamp));
+    const userString = JSON.stringify(user);
+    redisClient.zadd(rankingKey + "POSTED_LOG", now, userString);
+    redisClient.zadd(rankingKey, score, userString);
 }
 
 export async function zRevRank(
