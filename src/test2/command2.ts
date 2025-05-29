@@ -1,20 +1,22 @@
 export const TARGET = 'https://app2.tenten.games:9443';
-export const ROOM_NUMBER = '49634821';
-export const TEAM_1_ID = 834;
-export const TEAM_2_ID = 835;
+export const ROOM_NUMBER = '79784593';
+export const TEAM_1_ID = 840; // 조선대 - 840 , 동국대 - 838
+export const TEAM_2_ID = 841; // 조선대 - 841 , 동국대 - 839
 export const TOTAL_CLIENTS = 400 / 5; // 원하는 동시 접속자 수
-const TOTAL_TIME = 2 * 60 * 1000; // N분
-const REAL_TIME_SCORE_PER_SECOND_MIN = 1; // 0 ~ N 
-const REAL_TIME_SCORE_PER_SECOND_MAX = 4; // 0 ~ N 
-const FINAL_SCORE_MIN = 30; // 0 ~ 80
-const FINAL_SCORE_MAX = 60; // 0 ~ 80
+const TOTAL_TIME = 1 * 60 * 1000; // N분
+const REAL_TIME_SCORE_PER_SECOND_MIN = 3; // 0 ~ N 
+const REAL_TIME_SCORE_PER_SECOND_MAX = 10; // 0 ~ N 
+const FINAL_SCORE_MIN = 60; // 0 ~ 80
+const FINAL_SCORE_MAX = 100; // 0 ~ 80
 
 export function ENTER_ROOM_REQUEST(idx: number): string {
+	const rand = [14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,31,34,35,36,37];
+	const avatarId = rand[Math.floor(Math.random() * rand.length)];
 	return JSON.stringify({
 		"user": {
 			"i": idx, // user id
-			"a": Math.floor(Math.random() * (46 - 14 + 1)) + 14, // avatar id
-			"f": Math.floor(Math.random() * (46 - 14 + 1)) + 14, // avatar id
+			"a": avatarId, // avatar id
+			"f": avatarId,
 			"t": Math.random() < 0.5 ? TEAM_1_ID : TEAM_2_ID,
 			"n": generateNickname() // nickname
 		},
