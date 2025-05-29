@@ -134,7 +134,7 @@ export function zaddScore(
     const rankingKey = generateKey(roomNumber, match);
     const now = Date.now();
     const userString = JSON.stringify(user);
-    redisClient.zadd(rankingKey + "POSTED_LOG", now, userString);
+    redisClient.zadd(rankingKey + "_POSTED_LOG", now, userString);
     redisClient.zadd(rankingKey, score, userString);
 }
 
