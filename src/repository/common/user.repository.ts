@@ -2,7 +2,7 @@ import { User } from "../../common/entity/user.entity";
 import { redisClient } from "../../config/redis.config";
 import { TeamUserCount, UserCount } from "./dto/userCount.dto";
 
-export async function addUser(
+export async function addUserToRoom(
     roomNumber: string,
     user: User,
 ): Promise<void> {
@@ -10,14 +10,16 @@ export async function addUser(
         generateKey(roomNumber),
         user.t,
         JSON.stringify(user),
-    )
+    );
+    redisClient.sadd(`${roomNumber}_USER_IDS`, user.i.toString());
 }
 
-export async function deleteUser(
+export async function deleteUserFromRoom(
     roomNumber: string,
     user: User,
 ): Promise<void> {
     redisClient.zrem(generateKey(roomNumber), JSON.stringify(user));
+    redisClient.srem(`${roomNumber}_USER_IDS`, 0, JSON.stringify(user));
 }
 
 export async function getTotalUserCount(
@@ -69,6 +71,21 @@ function generateKey(roomNumber: string): string {
     return `${roomNumber}_USERLIST`;
 }
 
+export async function updateUserIconFromRoom(
+    roomNumber: string,
+    user: User,
+    iconId: number,
+): Promise<void> {
+    
+}
+
+export async function updateUserTeamFromRoom(
+    roomNumber: string,
+    user: User,
+    teamId: number,
+): Promise<void> {
+    
+}
 
 /*
 export async function getRoomUserMap(

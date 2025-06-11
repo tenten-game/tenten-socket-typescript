@@ -1,7 +1,7 @@
 import { Room } from "../../common/entity/room.entity";
 import { RoomMode } from "../../common/enums/enums";
 import { getRoom, setRoom } from "../../repository/common/room.repository";
-import { addUser } from "../../repository/common/user.repository";
+import { addUserToRoom } from "../../repository/common/user.repository";
 import { EventRoomChangeModeRequest, EventRoomCreateRequest, EventRoomEnterRequest } from "./dto/event.room.dto";
 
 export function handleEventRoomCreate(request: EventRoomCreateRequest, hostSocketId: string): void {
@@ -32,7 +32,7 @@ export async function handleEventRoomEnterAndGetHostSocketId(request: EventRoomE
         request.user.t = teamIds[randomIndex];
     }
 
-    addUser(request.roomNumber, request.user);
+    addUserToRoom(request.roomNumber, request.user);
     return room.hostSocketId
 }
 

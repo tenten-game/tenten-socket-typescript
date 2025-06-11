@@ -21,7 +21,7 @@ export function getSocketDataUser(
   socket: Socket,
 ): User {
   const socketData: SocketData = socket.data;
-  if (!socketData.user) throw new Error('유저 아이디가 없습니다.');
+  if (!socketData.user) throw new Error('유저가 없습니다.');
   return socketData.user;
 }
 
@@ -58,7 +58,7 @@ export function getEventHostSocketDataRoomNumber(
   return eventHostSocketData.roomNumber;
 }
 
-export function isUser(
+export function isNormalUser(
   socket: Socket,
 ): boolean {
   const socketData: SocketData = socket.data;

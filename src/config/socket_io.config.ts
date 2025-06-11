@@ -6,10 +6,12 @@ import { onEventInGameRealTimeScoreGet, onEventInGameRealTimeScorePost, onEventI
 import { onLobbyResetUserList, onLobbyStartGame, onLobbyUserCountGet, onLobbyUserListGet } from '../presentation/event/event.lobby.controller';
 import { onEventRoomChangeMode, onEventRoomCreate, onEventRoomEnter, onEventRoomHostReEnter } from '../presentation/event/event.room.controller';
 import { onEventFinishExit, onEventFinishRankingGet, onEventFinishScoreGet, onEventFinishScorePost } from '../presentation/event/evnet.finish.controller';
-import { onRoomChangeMode, onRoomCreate, onRoomEnter, onRoomExit } from '../presentation/normal/room.controller';
+import { onNormalRoomModeChange, onNormalRoomCreate, onNormalRoomEnter, onNormalRoomUserTeamChange, onNormalRoomUserIconChange, onNormalRoomUserTeamShuffle } from '../presentation/normal/normal.room.controller';
 import { logger } from '../util/logger';
 import { config } from './env.config';
 import { redisAdapter } from "./redis.config";
+import { onNormalInGameBypass } from '../presentation/normal/normal.ingame.controller';
+import { onNormalFinishExit, onNormalFinishScorePost } from '../presentation/normal/normal.finish.controller';
 
 export function installSocketIo(https: HttpServer): SocketServer {
 
@@ -37,11 +39,14 @@ export function installSocketIo(https: HttpServer): SocketServer {
 
   // socketIO.use((socket: Socket, next: any) => {
   //   const token = socket.handshake.headers.token;
-  //   if (!token) return next(new Error('THERE IS NO TOKEN'));
-  //   jwt.verify(token, process.env.JWT_SECRET, (err: any, decoded: any) => {
-  //     if (err) return next(new Error('AUTHENTICATION ERROR'));
-  //     next();
-  //   });
+  //   if (token) {
+  //     jwt.verify(token, process.env.JWT_SECRET, (err: any, decoded: any) => {
+  //       // if (err) return next(new Error('AUTHENTICATION ERROR'));
+  //       next();
+  //     });  
+  //   } else {
+  //     // return next(new Error('AUTHENTICATION ERROR'));
+  //   }
   // });
 
   return socketIO;
@@ -49,74 +54,71 @@ export function installSocketIo(https: HttpServer): SocketServer {
 
 export function initializeSocket(socketServer: SocketServer): void {
   socketServer.on('connection', async (socket: Socket): Promise<void> => {
-    // 받는것 로깅
-    if (config.env === 'development') {
-      socket.onAny((event, ...args) => logger.debug(`[ON] Socket Event: ${event}, Args: ${JSON.stringify(args)}, Socket ID: ${socket.id}, IP: ${socket.handshake.address}, UA: ${socket.handshake.headers['user-agent']}`));
-      socket.onAnyOutgoing((event, ...args) => logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}, Socket ID: ${socket.id}, IP: ${socket.handshake.address}, UA: ${socket.handshake.headers['user-agent']}`));
-      const originalEmit = socketServer.emit;
-      socketServer.emit = function (event: string, ...args: any[]) {
-        logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}`);
-        return originalEmit.apply(socketServer, [event, ...args]);
-      }
-    } else if (config.env === 'test') {
-      onTest(socketServer, socket);
-    }
 
-    // NORMAL APP
-    // CONNECTION
+    // // token 꺼내다 쓰기
+    // const token = socket.handshake.headers.token;
+
+    handleDevelopmentEnvironment(socketServer, socket);
+
+    // COMMON - CONNECTION
     onDisconnecting(socketServer, socket);
     onDisconnect(socketServer, socket);
     onConnectError(socketServer, socket);
 
-    // ROOM
-    onRoomCreate(socketServer, socket);
-    onRoomEnter(socketServer, socket);
-    onRoomChangeMode(socketServer, socket);
-    onRoomExit(socketServer, socket);
+    // NORMAL - ROOM
+    onNormalRoomCreate(socketServer, socket);
+    onNormalRoomEnter(socketServer, socket);
+    onNormalRoomModeChange(socketServer, socket);
+    onNormalRoomUserTeamChange(socketServer, socket);
+    onNormalRoomUserIconChange(socketServer, socket);
+    onNormalRoomUserTeamShuffle(socketServer, socket);
 
-    // // LOBBY
-    // onLobbyChangeIcon(socketServer, socket);
-    // onLobbyChangeTeam(socketServer, socket);
-    // onLobbyStartGame(socketServer, socket);
-    // onLobbyStartMultiGame(socketServer, socket);
+    // NORMAL - IN-GAME
+    onNormalInGameBypass(socketServer, socket);
 
-    // // IN-GAME
-    // onInGameMultiGameReady(socketServer, socket);
-    // onInGameBuzzer(socketServer, socket);
-    // onInGameApt(socketServer, socket);
-    // onInGameTouch(socketServer, socket);
-    // onInGameScore(socketServer, socket);
+    // NORMAL - FINISH
+    onNormalFinishScorePost(socketServer, socket);
+    onNormalFinishExit(socketServer, socket);
 
-
-    /**
-     * EVENT
-     */
-    // ROOM - HOST
+    // EVENT - ROOM
     onEventRoomCreate(socketServer, socket);
     onEventRoomChangeMode(socketServer, socket);
     onEventRoomHostReEnter(socketServer, socket);
-    // ROOM - USER
     onEventRoomEnter(socketServer, socket);
 
-    // LOBBY - HOST
+    // EVENT - LOBBY
     onLobbyStartGame(socketServer, socket);
     onLobbyUserCountGet(socketServer, socket);
     onLobbyUserListGet(socketServer, socket);
     onLobbyResetUserList(socketServer, socket);
 
-    // IN_GAME
+    // EVENT - IN_GAME
     onEventInGameRealTimeScorePost(socketServer, socket);
     onEventInGameRealTimeScoreGet(socketServer, socket);
     onEventInGameSendSeed(socketServer, socket);
 
-    // FINISH - WEB
+    // EVENT - FINISH
     onEventFinishScoreGet(socketServer, socket);
     onEventFinishExit(socketServer, socket);
-
-    // FINISH - APP
     onEventFinishScorePost(socketServer, socket);
     onEventFinishRankingGet(socketServer, socket);
-
   });
 
+}
+
+function handleDevelopmentEnvironment(
+  socketServer: SocketServer,
+  socket: Socket
+): void {
+  if (config.env === 'development') {
+    socket.onAny((event, ...args) => logger.debug(`[ON] Socket Event: ${event}, Args: ${JSON.stringify(args)}, Socket ID: ${socket.id}, IP: ${socket.handshake.address}, UA: ${socket.handshake.headers['user-agent']}`));
+    socket.onAnyOutgoing((event, ...args) => logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}, Socket ID: ${socket.id}, IP: ${socket.handshake.address}, UA: ${socket.handshake.headers['user-agent']}`));
+    const originalEmit = socketServer.emit;
+    socketServer.emit = function (event: string, ...args: any[]) {
+      logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}`);
+      return originalEmit.apply(socketServer, [event, ...args]);
+    }
+  } else if (config.env === 'test') {
+    onTest(socketServer, socket);
+  }
 }
