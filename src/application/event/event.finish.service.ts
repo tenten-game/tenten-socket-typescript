@@ -3,7 +3,7 @@ import { loggingTimeStamp } from "../../config/redis.config";
 import { getRoom } from "../../repository/common/room.repository";
 import { ProcessRankingsResult } from "../../repository/event/entity/rankings.entity";
 import { processRankingsNoTotalRankings, storeRankingGetLog, zaddScore, zRevRank } from "../../repository/event/event.ranking.repository";
-import { EventFinishScorePostRequest } from "./dto/event.finish.dto";
+import { EventFinishScorePostRequest } from "./dto/request";
 
 export async function handleEventFinishScoreGet(roomNumber: string, match: number): Promise<ProcessRankingsResult> {
     const room = await getRoom(roomNumber);

@@ -1,5 +1,5 @@
 import { Socket, Server as SocketServer } from 'socket.io';
-import { EventFinishRankingGetRequest, EventFinishScoreGetRequest, EventFinishScorePostRequest } from '../../application/event/dto/event.finish.dto';
+import { EventFinishRankingGetRequest, EventFinishScoreGetRequest, EventFinishScorePostRequest } from '../../application/event/dto/request';
 import { handleEventFinishRankingGet, handleEventFinishScoreGet, handleEventFinishScorePost } from '../../application/event/event.finish.service';
 import { ProcessRankingsResult } from '../../repository/event/entity/rankings.entity';
 import { getSocketDataRoomNumber, getSocketDataUser } from '../../repository/socket/socket.repository';

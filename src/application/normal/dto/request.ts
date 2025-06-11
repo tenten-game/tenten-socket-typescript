@@ -41,7 +41,9 @@ export class NormalRoomUserTeamChangeRequest {
 
 export class NormalRoomGameStartRequest{
     constructor(
-        public isReady: boolean,
+        public gameId: number,
+        public seconds: number,
+        public match: string,
     ) { }
 }
 

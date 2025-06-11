@@ -16,7 +16,7 @@ export async function add6040Do(roomNumber: string, user: User, floorData: numbe
 
 export async function get6040Do(roomNumber: string): Promise<Record<number, User[]>> {
     const responseMap: Record<number, User[]> = {};
-    const data:  = await redisClient.zrange(`${roomNumber}_6040`, 0, -1, 'WITHSCORES');
+    const data = await redisClient.zrange(`${roomNumber}_6040`, 0, -1, 'WITHSCORES');
 
     for (let i = 0; i < data.length; i += 2) {
         const userData = JSON.parse(data[i]);

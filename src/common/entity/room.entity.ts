@@ -1,4 +1,4 @@
-import { Event } from "../../application/event/dto/event.room.dto";
+import { Event } from "../../application/event/dto/request";
 import { RoomMode } from "../enums/enums";
 
 export class Room {

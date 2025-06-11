@@ -2,7 +2,7 @@ import { Room } from "../../common/entity/room.entity";
 import { RoomMode } from "../../common/enums/enums";
 import { getRoom, setRoom } from "../../repository/common/room.repository";
 import { addUserToRoom } from "../../repository/common/user.repository";
-import { EventRoomChangeModeRequest, EventRoomCreateRequest, EventRoomEnterRequest } from "./dto/event.room.dto";
+import { EventRoomChangeModeRequest, EventRoomCreateRequest, EventRoomEnterRequest } from "./dto/request";
 
 export function handleEventRoomCreate(request: EventRoomCreateRequest, hostSocketId: string): void {
     const room = new Room(

@@ -1,9 +1,15 @@
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
+import { Request, Response, NextFunction } from 'express';
 import { config } from "../../config/env.config";
+import { CustomJwtPayload } from '../../common/types/api.types';
 
 const jwtSecret: string = config.jwtSecret || '';
 
-export const authMiddleware = (req: any, res: any, next: any) => {
+interface AuthenticatedRequest extends Request {
+    decoded?: string | JwtPayload;
+}
+
+export const authMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
     const token = req.headers['x-access-token'] || req.query.token || req.body.token
 
     if(!token) {
@@ -12,23 +18,24 @@ export const authMiddleware = (req: any, res: any, next: any) => {
             message: 'not logged in'
         })
     }
-    const p = new Promise(
+    const p = new Promise<string | JwtPayload>(
         (resolve, reject): void => {
-            jwt.verify(token, jwtSecret, (err: any, decoded: any): void => {
+            jwt.verify(token, jwtSecret, (err: VerifyErrors | null, decoded: string | JwtPayload | undefined): void => {
                 if(err) reject(err)
-                resolve(decoded)
+                else if(decoded) resolve(decoded)
+                else reject(new Error('Invalid token'))
             })
         }
     )
 
-    const onError = (error: any): void => {
+    const onError = (error: Error): void => {
         res.status(403).json({
             success: false,
             message: error.message
         })
     }
 
-    p.then((decoded)=>{
+    p.then((decoded: string | JwtPayload): void => {
         req.decoded = decoded
         next()
     }).catch(onError)

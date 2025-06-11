@@ -1,6 +1,7 @@
 import { User } from "../../../common/entity/user.entity";
 import { EventType, RoomMode } from "../../../common/enums/enums";
 
+// EVENT ROOM
 export class EventRoomCreateRequest {
     constructor(
         public roomNumber: string,
@@ -45,5 +46,49 @@ export class EventRoomEnterRequest {
     constructor(
         public user: User,
         public roomNumber: string
+    ) { }
+}
+
+// EVENT LOBBY
+export class EventLobbyStartGameRequest {
+    constructor(
+        public gameNumber: number, 
+        public match: number,
+        public isPractice: boolean,
+    ) { }
+}
+
+// EVENT INGAME
+export class RealTimeScorePostRequest {
+    constructor(
+        public score: number, 
+        public match: number
+    ) { }
+}
+
+export class RealTimeScoreGetRequest {
+    constructor(
+        public teamId: number, 
+        public match: number
+    ) { }
+}
+
+// EVENT FINISH
+export class EventFinishScoreGetRequest {
+    constructor(
+        public match: number,
+    ) { }
+}
+
+export class EventFinishScorePostRequest {
+    constructor(
+        public score: number,
+        public match: number,
+    ) { }
+}
+
+export class EventFinishRankingGetRequest {
+    constructor(
+        public match: number,
     ) { }
 }

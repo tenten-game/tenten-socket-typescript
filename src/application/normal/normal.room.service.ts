@@ -7,16 +7,17 @@ import { addUserToRoom, getTotalAndTeamUserCount, getUserList, updateUserIconFro
 import { NormalRoomCreateRequest, NormalRoomEnterRequest, NormalRoomModeChangeRequest } from "./dto/request";
 import { NormalRoomUserCountGetResponse, NormalRoomUserListGetResponse } from "./dto/response";
 
-export function handleNormalRoomCreate(request: NormalRoomCreateRequest): void {
+export async function handleNormalRoomCreate(request: NormalRoomCreateRequest): Promise<void> {
     const user = request.user;
     const room = new Room(
         "", user.i, user.i, RoomMode.INDIVIDUAL, null
     )
-    setRoom(request.roomNumber, room);
+    await setRoom(request.roomNumber, room);
+    await addUserToRoom(request.roomNumber, user);
 }
 
 export async function handleNormalRoomEnter(request: NormalRoomEnterRequest): Promise<void> {
-    addUserToRoom(request.roomNumber, request.user);
+    await addUserToRoom(request.roomNumber, request.user);
 }
 
 export async function handleNormalRoomChangeMode(
@@ -51,7 +52,7 @@ export async function handleNormalRoomUserIconChange(
     user: User,
     iconId: number,
 ): Promise<void> {
-    updateUserIconFromRoom(roomNumber, user, iconId);
+    await updateUserIconFromRoom(roomNumber, user, iconId);
 }
 
 export async function handleNormalRoomUserTeamChange(
@@ -66,5 +67,45 @@ export async function handleNormalRoomUserTeamShuffle(
     roomNumber: string,
     user: User,
 ): Promise<void> {
+    const teamIds: number[] = [0, 1]; // Normal 게임은 팀 0, 1
+    const count = await getTotalAndTeamUserCount(roomNumber, teamIds);
+
+    const [team0Count, team1Count] = teamIds.map(
+        id => count.teamUserCount.find(team => team.teamId === id)?.count || 0
+    );
+
+    const diff = team0Count - team1Count;
+    const team0ToTeam1Count = Math.floor(team0Count / 2) + (diff > 0 ? Math.floor(diff / 2) : 0);
+    const team1ToTeam0Count = Math.floor(team1Count / 2) + (diff < 0 ? Math.floor(-diff / 2) : 0);
+
+    const userList: Record<number, User> = await getUserList(roomNumber);
+
+    // 팀별 유저 배열 만들기
+    const team0Users: User[] = Object.values(userList).filter(user => user.t === teamIds[0]);
+    const team1Users: User[] = Object.values(userList).filter(user => user.t === teamIds[1]);
+
+    // team0Users에서 team0ToTeam1Count만큼 랜덤으로 뽑기
+    const team0ToTeam1Users: User[] = [];
+    for (let i = 0; i < team0ToTeam1Count; i++) {
+        const randomIndex = Math.floor(Math.random() * team0Users.length);
+        team0ToTeam1Users.push(team0Users[randomIndex]);
+        team0Users.splice(randomIndex, 1);
+    }
+
+    // team1Users에서 team1ToTeam0Count만큼 랜덤으로 뽑기
+    const team1ToTeam0Users: User[] = [];
+    for (let i = 0; i < team1ToTeam0Count; i++) {
+        const randomIndex = Math.floor(Math.random() * team1Users.length);
+        team1ToTeam0Users.push(team1Users[randomIndex]);
+        team1Users.splice(randomIndex, 1);
+    }
+
+    // 실제로 팀 변경 적용
+    for (const user of team0ToTeam1Users) {
+        await updateUserTeamFromRoom(roomNumber, user, teamIds[1]);
+    }
+    for (const user of team1ToTeam0Users) {
+        await updateUserTeamFromRoom(roomNumber, user, teamIds[0]);
+    }
 
 }

@@ -1,7 +1,8 @@
 import { DisconnectReason, Socket, Server as SocketServer } from "socket.io";
-import { DisconnectResponse, handleEventHostDisconnected, handleEventUserDisconnected, handleNormalUserDisconnected } from "../../application/common/connection.service";
+import { handleEventUserDisconnected, handleNormalUserDisconnected } from "../../application/common/connection.service";
 import { User } from "../../common/entity/user.entity";
 import { getEventHostSocketDataRoomNumber, getSocketDataRoomNumber, getSocketDataUser, isEventHost, isEventUser, isNormalUser } from "../../repository/socket/socket.repository";
+import { logger } from '../../util/logger';
 import { sendGoogleChatMessage } from "../../util/webhook";
 
 export function onDisconnecting(
@@ -36,7 +37,7 @@ export function onDisconnect(
   socket: Socket
 ): void {
   socket.on('disconnect', async (reason: string): Promise<void> => {
-    console.log(`Socket ${socket.id} disconnected: ${reason}`);
+    logger.info(`Socket ${socket.id} disconnected: ${reason}`);
   });
 }
 
@@ -44,8 +45,8 @@ export function onConnectError(
   socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('connect_error', async (err): Promise<void> => {
-    console.log(`Socket ${socket.id} connection error: ${err}`);
+  socket.on('connect_error', async (err: Error): Promise<void> => {
+    logger.error(`Socket ${socket.id} connection error:`, err);
   });
 }
 

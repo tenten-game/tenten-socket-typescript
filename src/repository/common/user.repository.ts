@@ -19,7 +19,7 @@ export async function deleteUserFromRoom(
     user: User,
 ): Promise<void> {
     redisClient.zrem(generateKey(roomNumber), JSON.stringify(user));
-    redisClient.srem(`${roomNumber}_USER_IDS`, 0, JSON.stringify(user));
+    redisClient.srem(`${roomNumber}_USER_IDS`, JSON.stringify(user));
 }
 
 export async function getTotalUserCount(
@@ -76,7 +76,14 @@ export async function updateUserIconFromRoom(
     user: User,
     iconId: number,
 ): Promise<void> {
+    await redisClient.zrem(generateKey(roomNumber), JSON.stringify(user));
     
+    user.a = iconId;
+    await redisClient.zadd(
+        generateKey(roomNumber),
+        user.t,
+        JSON.stringify(user),
+    );
 }
 
 export async function updateUserTeamFromRoom(
@@ -84,36 +91,13 @@ export async function updateUserTeamFromRoom(
     user: User,
     teamId: number,
 ): Promise<void> {
+    await redisClient.zrem(generateKey(roomNumber), JSON.stringify(user));
     
+    // 팀 ID 업데이트 후 다시 추가
+    user.t = teamId;
+    await redisClient.zadd(
+        generateKey(roomNumber),
+        user.t,
+        JSON.stringify(user),
+    );
 }
-
-/*
-export async function getRoomUserMap(
-    roomNumber: string,
-): Promise<Record<string, User>> {
-    const userMap = await redisClient.hgetall(generateKey(roomNumber));
-    const result: Record<string, User> = {};
-    for (const key in userMap) {
-        if (userMap.hasOwnProperty(key)) {
-            const user = JSON.parse(userMap[key]);
-            result[user.i] = user;
-        }
-    }
-    return result;
-}
-
-export async function getRoomUser(
-    roomNumber: string,
-    userId: string,
-): Promise<User | null> {
-    const user: string | null = await redisClient.hget(generateKey(roomNumber), userId);
-    return user ? JSON.parse(user) : null;
-}
-
-export async function setRoomUser(
-    roomNumber: string,
-    user: User,
-): Promise<void> {
-    await redisClient.hset(generateKey(roomNumber), user.i, JSON.stringify(user));
-}
-*/

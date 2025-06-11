@@ -2,16 +2,16 @@ import { instrument } from '@socket.io/admin-ui';
 import { Server as HttpServer } from "http";
 import { Socket, Server as SocketServer } from 'socket.io';
 import { onConnectError, onDisconnect, onDisconnecting, onTest } from '../presentation/common/connection.controller';
+import { onEventFinishExit, onEventFinishRankingGet, onEventFinishScoreGet, onEventFinishScorePost } from '../presentation/event/event.finish.controller';
 import { onEventInGameRealTimeScoreGet, onEventInGameRealTimeScorePost, onEventInGameSendSeed } from '../presentation/event/event.ingame.controller';
 import { onLobbyResetUserList, onLobbyStartGame, onLobbyUserCountGet, onLobbyUserListGet } from '../presentation/event/event.lobby.controller';
 import { onEventRoomChangeMode, onEventRoomCreate, onEventRoomEnter, onEventRoomHostReEnter } from '../presentation/event/event.room.controller';
-import { onEventFinishExit, onEventFinishRankingGet, onEventFinishScoreGet, onEventFinishScorePost } from '../presentation/event/evnet.finish.controller';
-import { onNormalRoomModeChange, onNormalRoomCreate, onNormalRoomEnter, onNormalRoomUserTeamChange, onNormalRoomUserIconChange, onNormalRoomUserTeamShuffle } from '../presentation/normal/normal.room.controller';
+import { onNormalFinishExit, onNormalFinishScorePost } from '../presentation/normal/normal.finish.controller';
+import { onNormalInGame6030Do, onNormalInGame6040Do, onNormalInGameBypass } from '../presentation/normal/normal.ingame.controller';
+import { onNormalRoomCreate, onNormalRoomEnter, onNormalRoomGameStart, onNormalRoomModeChange, onNormalRoomUserCountGet, onNormalRoomUserIconChange, onNormalRoomUserListGet, onNormalRoomUserTeamChange, onNormalRoomUserTeamShuffle } from '../presentation/normal/normal.room.controller';
 import { logger } from '../util/logger';
 import { config } from './env.config';
 import { redisAdapter } from "./redis.config";
-import { onNormalInGameBypass } from '../presentation/normal/normal.ingame.controller';
-import { onNormalFinishExit, onNormalFinishScorePost } from '../presentation/normal/normal.finish.controller';
 
 export function installSocketIo(https: HttpServer): SocketServer {
 
@@ -72,9 +72,14 @@ export function initializeSocket(socketServer: SocketServer): void {
     onNormalRoomUserTeamChange(socketServer, socket);
     onNormalRoomUserIconChange(socketServer, socket);
     onNormalRoomUserTeamShuffle(socketServer, socket);
+    onNormalRoomGameStart(socketServer, socket);
+    onNormalRoomUserListGet(socketServer, socket);
+    onNormalRoomUserCountGet(socketServer, socket);
 
     // NORMAL - IN-GAME
     onNormalInGameBypass(socketServer, socket);
+    onNormalInGame6030Do(socketServer, socket);
+    onNormalInGame6040Do(socketServer, socket);
 
     // NORMAL - FINISH
     onNormalFinishScorePost(socketServer, socket);
@@ -114,7 +119,7 @@ function handleDevelopmentEnvironment(
     socket.onAny((event, ...args) => logger.debug(`[ON] Socket Event: ${event}, Args: ${JSON.stringify(args)}, Socket ID: ${socket.id}, IP: ${socket.handshake.address}, UA: ${socket.handshake.headers['user-agent']}`));
     socket.onAnyOutgoing((event, ...args) => logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}, Socket ID: ${socket.id}, IP: ${socket.handshake.address}, UA: ${socket.handshake.headers['user-agent']}`));
     const originalEmit = socketServer.emit;
-    socketServer.emit = function (event: string, ...args: any[]) {
+    socketServer.emit = function (event: string, ...args: unknown[]) {
       logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}`);
       return originalEmit.apply(socketServer, [event, ...args]);
     }

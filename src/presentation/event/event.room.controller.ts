@@ -1,9 +1,9 @@
 import { Socket, Server as SocketServer } from 'socket.io';
-import { EventRoomChangeModeRequest, EventRoomCreateRequest, EventRoomEnterRequest } from '../../application/event/dto/event.room.dto';
 import { handleEventRoomChangeMode, handleEventRoomCreate, handleEventRoomEnterAndGetHostSocketId, handleEventRoomHostReEnter } from '../../application/event/event.room.service';
 import { getEventHostSocketDataRoomNumber, setEventHostSocketData, setSocketDataUserAndRoomNumber } from '../../repository/socket/socket.repository';
 import { SocketDataType } from '../../common/enums/enums';
 import { RoomNumberRequest } from '../../common/dto/room.dto';
+import { EventRoomCreateRequest, EventRoomChangeModeRequest, EventRoomEnterRequest } from '../../application/event/dto/request';
 
 export function onEventRoomCreate(
   _socketServer: SocketServer,

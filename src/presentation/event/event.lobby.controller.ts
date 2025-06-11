@@ -1,5 +1,5 @@
 import { Socket, Server as SocketServer } from "socket.io";
-import { EventLobbyStartGameRequest, EventLobbyStartGameResponse } from "../../application/event/dto/event.lobby.dto";
+import { EventLobbyStartGameRequest } from "../../application/event/dto/request";
 import { handleEventLobbyUserListReset, handleLobbyUserCountGet, handleLobbyUserListGet, handleShuffleTeam } from "../../application/event/event.lobby.service";
 import { getSocketDataRoomNumber } from "../../repository/socket/socket.repository";
 import { UserCount } from "../../repository/common/dto/userCount.dto";

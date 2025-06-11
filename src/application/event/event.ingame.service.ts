@@ -1,5 +1,6 @@
 import { addRealTimeScore, getRealTimeScore } from "../../repository/event/event.realTimeScore.repository";
-import { RealTimeScoreGetRequest, RealTimeScoreGetResponse, RealTimeScorePostRequest } from "./dto/event.ingame.dto";
+import { RealTimeScoreGetRequest, RealTimeScorePostRequest } from "./dto/request";
+import { RealTimeScoreGetResponse } from "./dto/response";
 
 export function handleEventInGameRealTimeScorePost(request: RealTimeScorePostRequest, roomNumber: string, teamId: number): void {
     addRealTimeScore(roomNumber, request.match, teamId, request.score);

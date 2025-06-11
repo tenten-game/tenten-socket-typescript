@@ -3,7 +3,7 @@ import { NormalRoomCreateRequest, NormalRoomGameStartRequest, NormalRoomModeChan
 import { NormalRoomUserCountGetResponse, NormalRoomUserListGetResponse } from '../../application/normal/dto/response';
 import { SocketDataType } from '../../common/enums/enums';
 import { getSocketDataRoomNumber, getSocketDataUser, getSocketDataUserId, setSocketDataUserAndRoomNumber } from '../../repository/socket/socket.repository';
-import { handleNormalRoomChangeMode, handleNormalRoomCreate, handleNormalRoomEnter, handleNormalRoomUserCountGet, handleNormalRoomUserIconChange, handleNormalRoomUserListGet, handleNormalRoomUserTeamShuffle } from '../../application/normal/normal.room.service';
+import { handleNormalRoomChangeMode, handleNormalRoomCreate, handleNormalRoomEnter, handleNormalRoomUserCountGet, handleNormalRoomUserIconChange, handleNormalRoomUserListGet, handleNormalRoomUserTeamChange, handleNormalRoomUserTeamShuffle } from '../../application/normal/normal.room.service';
 
 export function onNormalRoomCreate(
   _socketServer: SocketServer,
@@ -62,7 +62,7 @@ export function onNormalRoomUserTeamChange(
 ): void {
   socket.on('normal.room.user.team.change', async (req: any): Promise<void> => {
     const request: NormalRoomUserTeamChangeRequest = typeof req === 'string' ? JSON.parse(req) : req;
-
+    await handleNormalRoomUserTeamChange(getSocketDataRoomNumber(socket), getSocketDataUser(socket), request.teamId);
     _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.room.user.team.changed', JSON.stringify({
       userId: getSocketDataUserId(socket),
       teamId: request.teamId

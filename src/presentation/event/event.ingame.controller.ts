@@ -1,5 +1,6 @@
 import { Socket, Server as SocketServer } from "socket.io";
-import { RealTimeScoreGetRequest, RealTimeScoreGetResponse, RealTimeScorePostRequest } from "../../application/event/dto/event.ingame.dto";
+import { RealTimeScoreGetRequest, RealTimeScorePostRequest } from "../../application/event/dto/request";
+import { RealTimeScoreGetResponse } from "../../application/event/dto/response";
 import { handleEventInGameRealTimeScoreGet, handleEventInGameRealTimeScorePost } from "../../application/event/event.ingame.service";
 import { getSocketDataRoomNumber, getSocketDataUser } from "../../repository/socket/socket.repository";
 
