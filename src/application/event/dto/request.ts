@@ -9,6 +9,12 @@ export class EventRoomCreateRequest {
     ) { }
 }
 
+export class EventRoomReEnterRequest {
+    constructor(
+        public roomNumber: string,
+    ) { }
+}
+
 export class Event {
     constructor(
         public id: number,

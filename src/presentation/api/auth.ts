@@ -1,7 +1,6 @@
 import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
 import { Request, Response, NextFunction } from 'express';
 import { config } from "../../config/env.config";
-import { CustomJwtPayload } from '../../common/types/api.types';
 
 const jwtSecret: string = config.jwtSecret || '';
 
@@ -9,7 +8,7 @@ interface AuthenticatedRequest extends Request {
     decoded?: string | JwtPayload;
 }
 
-export const authMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+export const authMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const token = req.headers['x-access-token'] || req.query.token || req.body.token
 
     if(!token) {

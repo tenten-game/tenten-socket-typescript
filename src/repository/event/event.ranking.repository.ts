@@ -1,22 +1,22 @@
-import { TOP_N } from '../../common/const/const';
 import { User } from '../../common/entity/user.entity';
 import { redisClient } from '../../config/redis.config';
 import { saveLogToFirestore } from '../../util/firestore';
+import { KEY_EVENT_MATCH_RANKING, KEY_EVENT_MATCH_RANKING_CALCULATED, KEY_EVENT_MATCH_RANKING_GET_LOG, KEY_EVENT_MATCH_RANKING_POSTED_LOG, KEY_EVENT_MATCH_RANKING_RESULT } from '../../util/redis_key_generator';
 import { ProcessRankingsResult, Ranking, RankingDTO, TeamScore } from './entity/rankings.entity';
+
+const TOP_N = 10; 
 
 export async function processRankingsNoTotalRankings(
     roomNumber: string,
     match: number,
     teamIds: number[],
 ): Promise<ProcessRankingsResult> {
-    const rankingKey: string = generateKey(roomNumber, match);
-    const calculatedKey: string = rankingKey + '_CALCULATED';
-    const allRankings: Ranking[] = await getAllRankings(rankingKey);
+    const allRankings: Ranking[] = await getAllRankings(KEY_EVENT_MATCH_RANKING(roomNumber, match));
     const overallRankings: (Ranking & { rank: number })[] = assignRanks(allRankings);
 
     overallRankings.forEach(ranking => {
         redisClient.zadd(
-            calculatedKey,
+            KEY_EVENT_MATCH_RANKING_CALCULATED(roomNumber, match),
             ranking.rank || -1,
             JSON.stringify(new User(ranking.i, ranking.a, ranking.f, ranking.t, ranking.n))
         );
@@ -46,6 +46,7 @@ export async function processRankingsNoTotalRankings(
                 n: r.n,
                 t: r.t,
             }));
+            
         teamBottomRankings[teamId] = sortedTeamRankings
             .slice(-TOP_N)
             .map(r => ({
@@ -84,7 +85,7 @@ export async function processRankingsNoTotalRankings(
         totalBottomRankings,
         totalMiddleRankings,
     };
-    redisClient.set(`${rankingKey}_RESULT`, JSON.stringify(response));
+    redisClient.set(KEY_EVENT_MATCH_RANKING_RESULT(roomNumber, match), JSON.stringify(response));
     return response;
 }
 
@@ -131,11 +132,10 @@ export function zaddScore(
     match: number,
     user: User,
 ): void {
-    const rankingKey = generateKey(roomNumber, match);
     const now = Date.now();
     const userString = JSON.stringify(user);
-    redisClient.zadd(rankingKey + "_POSTED_LOG", now, userString);
-    redisClient.zadd(rankingKey, score, userString);
+    redisClient.zadd(KEY_EVENT_MATCH_RANKING_POSTED_LOG(roomNumber, match), now, userString);
+    redisClient.zadd(KEY_EVENT_MATCH_RANKING(roomNumber, match), score, userString);
 }
 
 export async function zRevRank(
@@ -143,8 +143,7 @@ export async function zRevRank(
     match: number,
     user: User,
 ): Promise<number> {
-    const rankingKey = generateKey(roomNumber, match) + "_CALCULATED";
-    const ranking: string = (await redisClient.zscore(rankingKey, JSON.stringify(user))) || "-1";
+    const ranking: string = await redisClient.zscore(KEY_EVENT_MATCH_RANKING_CALCULATED(roomNumber, match), JSON.stringify(user)) || "-1";
     if (ranking === "-1") {
         const random = Math.floor(Math.random() * 1000000);
         saveLogToFirestore(
@@ -162,105 +161,10 @@ export async function zRevRank(
     return parseInt(ranking);
 }
 
-function generateKey(roomNumber: string, match: number): string {
-    return `${roomNumber}_${match}_RANKING`;
-}
-
 export function storeRankingGetLog(
     roomNumber: string,
     match: number,
     user: User,
 ): void {
-    const rankingKey = generateKey(roomNumber, match) + "_GET_LOG";
-    redisClient.zadd(rankingKey, Date.now(), JSON.stringify(user));
+    redisClient.zadd(KEY_EVENT_MATCH_RANKING_GET_LOG(roomNumber, match), Date.now(), JSON.stringify(user));
 }
-
-/*
-export async function processRankings(
-    roomNumber: string,
-    match: number,
-    teamIds: number[],
-): Promise<ProcessRankingsResult> {
-    const rankingKey = generateKey(roomNumber, match);
-    const calculatedKey = rankingKey + '_CALCULATED';
-    const allRankings = await getAllRankings(rankingKey);
-    const overallRankings = assignRanks(allRankings);
-
-    overallRankings.forEach(ranking => {
-        redisClient.zadd(
-            calculatedKey,
-            ranking.rank || -1,
-            JSON.stringify(new User(ranking.i, ranking.a, ranking.f, ranking.t, ranking.n))
-        );
-    });
-
-    const totalRankings: RankingDTO[] = overallRankings.map(r => ({
-        r: r.rank as number,
-        s: r.score as number,
-        u: r.i,
-        a: r.a,
-        f: r.f,
-        n: r.n,
-        t: r.t,
-    }));
-
-    const teamScore: TeamScore[] = [];
-    const teamTopRankings: { [teamId: number]: RankingDTO[] } = {};
-    const teamBottomRankings: { [teamId: number]: RankingDTO[] } = {};
-
-    for (const teamId of teamIds) {
-        const teamRankings = overallRankings.filter(r => r.t === teamId);
-        const totalScore = teamRankings.reduce((sum, r) => sum + (r.score || 0), 0);
-        const averageScore = teamRankings.length > 0 ? totalScore / teamRankings.length : 0;
-        teamScore.push({ id: teamId, totalScore, averageScore });
-
-        const sortedTeamRankings = teamRankings.sort((a, b) => (a.rank as number) - (b.rank as number));
-        teamTopRankings[teamId] = sortedTeamRankings
-            .slice(0, TOP_N)
-            .map(r => ({
-                r: r.rank as number,
-                s: r.score as number,
-                u: r.i,
-                a: r.a,
-                f: r.f,
-                n: r.n,
-                t: r.t,
-            }));
-        teamBottomRankings[teamId] = sortedTeamRankings
-            .slice(-TOP_N)
-            .map(r => ({
-                r: r.rank as number,
-                s: r.score as number,
-                u: r.i,
-                a: r.a,
-                f: r.f,
-                n: r.n,
-                t: r.t,
-            }));
-    }
-
-    let winTeamId = teamIds[0];
-    let maxAverageScore = -Infinity;
-    for (const ts of teamScore) {
-        if (ts.averageScore > maxAverageScore) {
-            maxAverageScore = ts.averageScore;
-            winTeamId = ts.id;
-        }
-    }
-
-    const totalTopRankings = totalRankings.slice(0, TOP_N);
-    const totalBottomRankings = totalRankings.slice(-TOP_N);
-
-    return {
-        winTeamId,
-        teamScore,
-        totalRankings,
-        teamTopRankings,
-        teamBottomRankings,
-        totalTopRankings,
-        totalBottomRankings,
-        totalMiddleRankings: [], // total Rankings 의 딱 중간 랭킹
-    };
-}
-
-*/

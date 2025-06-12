@@ -1,17 +1,30 @@
 import { Room } from "../../common/entity/room.entity";
 import { redisClient } from "../../config/redis.config";
+import { KEY_ROOM } from "../../util/redis_key_generator";
 
 export async function setRoom(roomNumber: string, room: Room): Promise<void> {
-    await redisClient.set(generateRoomKey(roomNumber), JSON.stringify(room));
+    await redisClient.set(KEY_ROOM(roomNumber), JSON.stringify(room));
 }
 
 export async function getRoom(roomNumber: string): Promise<Room> {
-    const roomKey = generateRoomKey(roomNumber);
-    const room: string | null = await redisClient.get(generateRoomKey(roomNumber));
+    const room: string | null = await redisClient.get(KEY_ROOM(roomNumber));
     if (!room) throw Error('Event room not found');
     return JSON.parse(room);
 }
 
-function generateRoomKey(roomNumber: string): string {
-    return `${roomNumber}`;
+export async function deleteAllRoomData(roomNumber: string): Promise<void> {
+    const pattern = `${roomNumber}*`;    
+    const keys: string[] = [];
+    let cursor = '0';
+    
+    do {
+        const result = await redisClient.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+        cursor = result[0];
+        keys.push(...result[1]);
+    } while (cursor !== '0');
+    
+    // 찾은 키들을 모두 삭제
+    if (keys.length > 0) {
+        await redisClient.del(...keys);
+    }
 }

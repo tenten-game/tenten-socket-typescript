@@ -2,8 +2,7 @@ import { Socket, Server as SocketServer } from 'socket.io';
 import { handleEventRoomChangeMode, handleEventRoomCreate, handleEventRoomEnterAndGetHostSocketId, handleEventRoomHostReEnter } from '../../application/event/event.room.service';
 import { getEventHostSocketDataRoomNumber, setEventHostSocketData, setSocketDataUserAndRoomNumber } from '../../repository/socket/socket.repository';
 import { SocketDataType } from '../../common/enums/enums';
-import { RoomNumberRequest } from '../../common/dto/room.dto';
-import { EventRoomCreateRequest, EventRoomChangeModeRequest, EventRoomEnterRequest } from '../../application/event/dto/request';
+import { EventRoomCreateRequest, EventRoomChangeModeRequest, EventRoomEnterRequest, EventRoomReEnterRequest } from '../../application/event/dto/request';
 
 export function onEventRoomCreate(
   _socketServer: SocketServer,
@@ -35,7 +34,7 @@ export function onEventRoomHostReEnter(
   socket: Socket
 ): void {
   socket.on('event.room.host.reEnter', async (req: any): Promise<void> => {
-    const request: RoomNumberRequest = typeof req === 'string' ? JSON.parse(req) : req;
+    const request: EventRoomReEnterRequest = typeof req === 'string' ? JSON.parse(req) : req;
     socket.join(request.roomNumber);
     setEventHostSocketData(socket, request.roomNumber);
     await handleEventRoomHostReEnter(request.roomNumber, socket.id);

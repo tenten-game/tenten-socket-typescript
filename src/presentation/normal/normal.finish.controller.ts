@@ -16,7 +16,7 @@ export function onNormalFinishExit(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('normal.finish.exit', async (req: any): Promise<void> => {
+  socket.on('normal.finish.exit', async (): Promise<void> => {
     _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.finish.exited');
   });
 }

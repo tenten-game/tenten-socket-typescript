@@ -7,7 +7,7 @@ import { onEventInGameRealTimeScoreGet, onEventInGameRealTimeScorePost, onEventI
 import { onLobbyResetUserList, onLobbyStartGame, onLobbyUserCountGet, onLobbyUserListGet } from '../presentation/event/event.lobby.controller';
 import { onEventRoomChangeMode, onEventRoomCreate, onEventRoomEnter, onEventRoomHostReEnter } from '../presentation/event/event.room.controller';
 import { onNormalFinishExit, onNormalFinishScorePost } from '../presentation/normal/normal.finish.controller';
-import { onNormalInGame6030Do, onNormalInGame6040Do, onNormalInGameBypass } from '../presentation/normal/normal.ingame.controller';
+import { onNormalInGame6030Do, onNormalInGame6040Do, onNormalInGame6040Finish, onNormalInGameBypass } from '../presentation/normal/normal.ingame.controller';
 import { onNormalRoomCreate, onNormalRoomEnter, onNormalRoomGameStart, onNormalRoomModeChange, onNormalRoomUserCountGet, onNormalRoomUserIconChange, onNormalRoomUserListGet, onNormalRoomUserTeamChange, onNormalRoomUserTeamShuffle } from '../presentation/normal/normal.room.controller';
 import { logger } from '../util/logger';
 import { config } from './env.config';
@@ -30,24 +30,29 @@ export function installSocketIo(https: HttpServer): SocketServer {
   instrument(socketIO, {
     auth: {
       type: 'basic',
-      username: 'tenten-admin',
-      password: '$2b$12$PD2rUQfBtio5rV.DY1z7Ou1WwtS3FdjamtHeh0UjBXokmuEllZsda', // Xpsxps12!@
+      username: config.socketAdminUsername,
+      password: config.socketAdminPasswordHash,
     },
   });
 
   socketIO.adapter(redisAdapter);
 
-  // socketIO.use((socket: Socket, next: any) => {
-  //   const token = socket.handshake.headers.token;
-  //   if (token) {
-  //     jwt.verify(token, process.env.JWT_SECRET, (err: any, decoded: any) => {
-  //       // if (err) return next(new Error('AUTHENTICATION ERROR'));
-  //       next();
-  //     });  
-  //   } else {
-  //     // return next(new Error('AUTHENTICATION ERROR'));
-  //   }
-  // });
+  // JWT Authentication Middleware
+  socketIO.use((socket: Socket, next: any) => {
+    const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.replace('Bearer ', '');
+    
+    if (!token) {
+      return next(new Error('Authentication token required'));
+    }
+
+    jwt.verify(token, config.jwtSecret, (err: any, decoded: any) => {
+      if (err) {
+        return next(new Error('Invalid authentication token'));
+      }
+      socket.data.token = decoded;
+      next();
+    });
+  });
 
   return socketIO;
 }
@@ -57,7 +62,7 @@ export function initializeSocket(socketServer: SocketServer): void {
 
     // // token 꺼내다 쓰기
     // const token = socket.handshake.headers.token;
-
+    // DEVELOPMENT, TEST
     handleDevelopmentEnvironment(socketServer, socket);
 
     // COMMON - CONNECTION
@@ -65,6 +70,7 @@ export function initializeSocket(socketServer: SocketServer): void {
     onDisconnect(socketServer, socket);
     onConnectError(socketServer, socket);
 
+    /* ! NORMAL ! */
     // NORMAL - ROOM
     onNormalRoomCreate(socketServer, socket);
     onNormalRoomEnter(socketServer, socket);
@@ -80,11 +86,13 @@ export function initializeSocket(socketServer: SocketServer): void {
     onNormalInGameBypass(socketServer, socket);
     onNormalInGame6030Do(socketServer, socket);
     onNormalInGame6040Do(socketServer, socket);
+    onNormalInGame6040Finish(socketServer, socket);
 
     // NORMAL - FINISH
     onNormalFinishScorePost(socketServer, socket);
     onNormalFinishExit(socketServer, socket);
 
+    /* ! EVENT ! */
     // EVENT - ROOM
     onEventRoomCreate(socketServer, socket);
     onEventRoomChangeMode(socketServer, socket);
@@ -107,8 +115,8 @@ export function initializeSocket(socketServer: SocketServer): void {
     onEventFinishExit(socketServer, socket);
     onEventFinishScorePost(socketServer, socket);
     onEventFinishRankingGet(socketServer, socket);
+    
   });
-
 }
 
 function handleDevelopmentEnvironment(

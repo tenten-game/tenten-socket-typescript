@@ -1,31 +1,60 @@
 import { Room } from "../../common/entity/room.entity";
 import { User } from "../../common/entity/user.entity";
-import { getRoom, setRoom } from "../../repository/common/room.repository";
-import { deleteUserFromRoom, getTotalUserCount } from "../../repository/common/user.repository";
+import { deleteAllRoomData, getRoom, setRoom } from "../../repository/common/room.repository";
+import { deleteUserFromRoom, getTotalUserCount, getUserList } from "../../repository/common/user.repository";
 
-export async function handleNormalUserDisconnected(roomNumber: string, user: User): Promise<null> {
+export async function handleNormalUserDisconnected(roomNumber: string, user: User): Promise<NormalDisconnectResponse> {
     const room: Room = await getRoom(roomNumber);
     const isMaster = room.master == user.i;
     const isStarter = room.starter == user.i;
 
     await deleteUserFromRoom(roomNumber, user);
 
-    if (isMaster && isStarter) { // 방장이자 스타터일 때
+    const remainingUserCount = await getTotalUserCount(roomNumber);
 
-    } else if (isMaster) { // 방장일 때
-
-    } else if (isStarter) { // 스타터일 때 
-
-    } else {
-
+    // 방에 아무도 없으면 방 삭제 필요
+    if (remainingUserCount === 0) {
+        await deleteAllRoomData(roomNumber);
+        return new NormalDisconnectResponse(true, null, null);
     }
 
-    return null;
+    const userList = await getUserList(roomNumber);
+    const remainingUsers = Object.values(userList);
+
+    let newMaster = room.master;
+    let newStarter = room.starter;
+    let masterChanged = false;
+    let starterChanged = false;
+
+    // 방장이 나갔을 때 다음 사용자에게 위임
+    if (isMaster && remainingUsers.length > 0) {
+        newMaster = remainingUsers[0].i;
+        masterChanged = true;
+    }
+
+    // 스타터가 나갔을 때 다음 사용자에게 위임
+    if (isStarter && remainingUsers.length > 0) {
+        newStarter = remainingUsers[0].i;
+        starterChanged = true;
+    }
+
+    // Room 정보 업데이트
+    if (masterChanged || starterChanged) {
+        room.master = newMaster;
+        room.starter = newStarter;
+        await setRoom(roomNumber, room);
+    }
+
+    return new NormalDisconnectResponse(
+        false,
+        masterChanged ? newMaster : null,
+        starterChanged ? newStarter : null
+    );
 }
 
 export async function handleEventHostDisconnected(roomNumber: string): Promise<DisconnectResponse> {
     const room: Room = await getRoom(roomNumber);
-    if(room.event) room.event.isHostConnected = false;
+    if (room.event) room.event.isHostConnected = false;
     setRoom(roomNumber, room);
     const totalUser = await getTotalUserCount(roomNumber);
     return new DisconnectResponse(
@@ -54,6 +83,14 @@ export class EventUserDisconnectedResponse {
         public hostSocketId: string,
         public isHostConnected: boolean = true,
         public totalUserCount: number,
+    ) { }
+}
+
+export class NormalDisconnectResponse {
+    constructor(
+        public needToDeleteRoom: boolean,
+        public newMaster: number | null,
+        public newStarter: number | null,
     ) { }
 }
 

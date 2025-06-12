@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : process.env.NODE_ENV === 'test' ? 'env.test' : '.env.development';
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : process.env.NODE_ENV === 'test' ? '.env.test' : '.env';
 dotenv.config({ path: envFile });
 
 const PROD_NUMBER: string = process.env.APP_NUMBER || '';
@@ -16,4 +16,12 @@ export const config = {
   serverUrl: SERVER_URL,
   jwtSecret: process.env.JWT_SECRET || 'secret',
   logLevel: process.env.LOG_LEVEL || 'info',
+  // Socket.IO Admin UI
+  socketAdminUsername: process.env.SOCKET_ADMIN_USERNAME || 'admin',
+  socketAdminPasswordHash: process.env.SOCKET_ADMIN_PASSWORD_HASH || '',
+  // Webhook URLs
+  slackWebhookUrl: process.env.SLACK_WEBHOOK_URL || '',
+  googleChatWebhookUrl: process.env.GOOGLE_CHAT_WEBHOOK_URL || '',
+  googleChatApiKey: process.env.GOOGLE_CHAT_API_KEY || '',
+  googleChatToken: process.env.GOOGLE_CHAT_TOKEN || '',
 }

@@ -1,5 +1,5 @@
 import { getFirestore } from 'firebase-admin/firestore';
-import { sendWebHook } from './webhook';
+import { sendGoogleChatMessage } from './webhook';
 
 export const saveLogToFirestore = async (
   collectionId: string,
@@ -16,6 +16,6 @@ export const saveLogToFirestore = async (
         { ...message },
       );
   } catch (e) {
-    sendWebHook(`Error occurred while saving log to Firestore: ${e} ${message}`);
+    sendGoogleChatMessage(`Error occurred while saving log to Firestore: ${e} ${message}`);
   }
 };

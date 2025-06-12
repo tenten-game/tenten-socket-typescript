@@ -13,3 +13,9 @@ export class NormalRoomUserCountGetResponse{
         public teamUserCount: TeamUserCount[],
     ) { }
 }
+
+export class NormalInGame6040FinishResponse{
+    constructor(
+        public floorData: number,
+    ) { }
+}
