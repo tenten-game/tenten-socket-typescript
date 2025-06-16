@@ -32,6 +32,52 @@
    - Socket.IO 연결 시 JWT 토큰 검증 미들웨어 활성화
    - 인증 실패 시 연결 거부
 
+### ✅ **Phase 3: Critical Performance Issues Resolution**
+1. **Redis KEYS → SCAN 교체**
+   - `src/presentation/api/api.controller.ts:96-118` - 블로킹 제거
+   - 동시 요청 처리 성능 대폭 향상
+
+2. **Redis await 누락 수정 (12개 작업)**
+   - `src/repository/common/user.repository.ts` - 사용자 관리 작업
+   - `src/repository/event/event.ranking.repository.ts` - 랭킹 작업 (Pipeline 최적화)
+   - `src/repository/event/event.realTimeScore.repository.ts` - 실시간 점수
+   - `src/config/redis.config.ts` - 로깅 타임스탬프
+   - Race condition 완전 제거
+
+3. **워커 생성 최적화**
+   - `src/config/app.config.ts` - CPU/메모리 기반 지능형 워커 수 계산
+   - 환경변수로 수동 설정 가능 (`WORKER_COUNT`)
+   - 개발환경 최적화 및 워커 모니터링 강화
+
+### ✅ **Phase 4: Team Shuffle Algorithm Improvement**
+1. **팀 셔플 로직 완전 개선**
+   - `src/application/normal/normal.room.service.ts:67-99` - `handleNormalRoomUserTeamShuffle`
+   - Fisher-Yates 알고리즘으로 전체 유저 랜덤 셔플
+   - 반반 팀 배정으로 완벽한 밸런스 보장
+   - 기존 팀 비교 로직 제거하여 진정한 랜덤 셔플 구현
+
+### ✅ **Phase 5: Redis User Storage Architecture Redesign**
+1. **User 식별성 문제 해결**
+   - 기존 문제: `JSON.stringify(user)` 전체를 Redis member로 사용 → 속성 변경 시 식별 불가
+   - 해결: User ID 기반 분리 저장 구조 도입
+
+2. **새로운 Redis 저장 구조**
+   - `KEY_USERLIST`: Sorted Set (user.id만 저장, score = teamId)
+   - `KEY_USER_DATA`: Hash (user.id → 전체 User 데이터)
+   - `KEY_USER_IDS`: Set (user.id 목록, 기존 호환성 유지)
+
+3. **Repository 전면 재구현**
+   - `src/repository/common/user.repository.ts` - 완전 재작성
+   - JOIN 효과: `getUserList()` 에서 ID 목록 + 데이터 조합
+   - Pipeline 최적화: 모든 작업을 배치 처리
+   - 안정적 업데이트: 아이콘/팀 변경 시 ID 기반 안전한 갱신
+
+4. **주요 개선사항**
+   - **아이콘 변경**: Hash만 업데이트 (Sorted Set 변경 불필요)
+   - **팀 변경**: Sorted Set score + Hash 데이터 동시 업데이트
+   - **사용자 삭제**: 3개 저장소에서 안전하게 제거
+   - **성능 향상**: Pipeline 사용으로 네트워크 왕복 최소화
+
 ## Current Status
 
 ### 🎯 **Next Priority: High Issues (2nd Phase)**

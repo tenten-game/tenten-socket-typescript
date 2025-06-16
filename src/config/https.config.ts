@@ -25,7 +25,7 @@ export function installHttps(app: Application): HttpServer {
 
   https.listen(port, (): void => {
     const address: AddressInfo = https.address() as AddressInfo;
-    console.log(`Server is running on port ${address.port}`);
+    logger.info(`Server is running on port ${address.port}`);
   });
 
   return https;
@@ -36,7 +36,7 @@ function handleHttpLocal(app: Application): HttpServer {
     const http: HttpServer = require('http').createServer(app);
     http.listen(port, (): void => {
       const address: AddressInfo = http.address() as AddressInfo;
-      console.log(`[LOCAL]Server is running on port ${address.port}`);
+      logger.info(`[LOCAL]Server is running on port ${address.port}`);
     });
     return http;
   }

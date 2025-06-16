@@ -11,8 +11,8 @@ const SERVER_URL: string = ENV_SERVER_URL;
 // 기본 export 설정
 export const config = {
   env: process.env.NODE_ENV || 'development',
-  httpsPort: process.env.HTTPS_PORT || '9443',
-  httpPort: process.env.HTTP_PORT || '9442',
+  httpsPort: '9443',
+  httpPort: '9442',
   serverUrl: SERVER_URL,
   jwtSecret: process.env.JWT_SECRET || 'secret',
   logLevel: process.env.LOG_LEVEL || 'info',
@@ -20,7 +20,6 @@ export const config = {
   socketAdminUsername: process.env.SOCKET_ADMIN_USERNAME || 'admin',
   socketAdminPasswordHash: process.env.SOCKET_ADMIN_PASSWORD_HASH || '',
   // Webhook URLs
-  slackWebhookUrl: process.env.SLACK_WEBHOOK_URL || '',
   googleChatWebhookUrl: process.env.GOOGLE_CHAT_WEBHOOK_URL || '',
   googleChatApiKey: process.env.GOOGLE_CHAT_API_KEY || '',
   googleChatToken: process.env.GOOGLE_CHAT_TOKEN || '',

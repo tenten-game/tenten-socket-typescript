@@ -1,4 +1,4 @@
-import { addRealTimeScore, getRealTimeScore } from "../../repository/event/event.realTimeScore.repository";
+import { addRealTimeScore, getRealTimeScore } from "../../repository/event/event.real_time_score.repository";
 import { RealTimeScoreGetRequest, RealTimeScorePostRequest } from "./dto/request";
 import { RealTimeScoreGetResponse } from "./dto/response";
 

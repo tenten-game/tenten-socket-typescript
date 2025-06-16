@@ -1,22 +1,29 @@
 import { User } from "../../common/entity/user.entity";
 import { redisClient } from "../../config/redis.config";
-import { KEY_USER_IDS, KEY_USERLIST } from "../../util/redis_key_generator";
+import { KEY_USER_DATA, KEY_USERLIST } from "../../util/redis_key_generator";
 import { TeamUserCount, UserCount } from "./dto/userCount.dto";
+import { logger } from "../../util/logger";
 
 export async function addUserToRoom(
     roomNumber: string,
     user: User,
 ): Promise<void> {
-    redisClient.zadd(KEY_USERLIST(roomNumber), user.t, JSON.stringify(user));
-    redisClient.sadd(KEY_USER_IDS(roomNumber), user.i.toString());
+    const userId = user.i.toString();
+    const pipeline = redisClient.pipeline();
+    pipeline.zadd(KEY_USERLIST(roomNumber), user.t, userId);
+    pipeline.hset(KEY_USER_DATA(roomNumber), userId, JSON.stringify(user));
+    await pipeline.exec();
 }
 
 export async function deleteUserFromRoom(
     roomNumber: string,
     user: User,
 ): Promise<void> {
-    redisClient.zrem(KEY_USERLIST(roomNumber), JSON.stringify(user));
-    redisClient.srem(KEY_USER_IDS(roomNumber), JSON.stringify(user));
+    const userId = user.i.toString();
+    const pipeline = redisClient.pipeline();
+    pipeline.zrem(KEY_USERLIST(roomNumber), userId);
+    pipeline.hdel(KEY_USER_DATA(roomNumber), userId);
+    await pipeline.exec();
 }
 
 export async function getTotalUserCount(
@@ -25,10 +32,13 @@ export async function getTotalUserCount(
     return redisClient.zcard(KEY_USERLIST(roomNumber));
 }
 
-export function resetAllUser(
+export async function resetAllUser(
     roomNumber: string,
-): void {
-    redisClient.del(KEY_USERLIST(roomNumber));
+): Promise<void> {
+    const pipeline = redisClient.pipeline();
+    pipeline.del(KEY_USERLIST(roomNumber));
+    pipeline.del(KEY_USER_DATA(roomNumber));
+    await pipeline.exec();
 }
 
 export async function getTotalAndTeamUserCount(
@@ -37,12 +47,10 @@ export async function getTotalAndTeamUserCount(
 ): Promise<UserCount> {
     const totalUserCount: number = await redisClient.zcard(KEY_USERLIST(roomNumber));
     const teamUserCount: Record<number, number> = {};
-
     for (const teamId of teamIds) {
         const count: number = await redisClient.zcount(KEY_USERLIST(roomNumber), teamId, teamId);
         teamUserCount[teamId] = count;
     }
-
     return new UserCount(
         totalUserCount,
         Object.entries(teamUserCount).map(([teamId, count]) => new TeamUserCount(parseInt(teamId), count)),
@@ -52,13 +60,21 @@ export async function getTotalAndTeamUserCount(
 export async function getUserList(
     roomNumber: string,
 ): Promise<Record<number, User>> {
-    const userStringList: string[] = await redisClient.zrange(KEY_USERLIST(roomNumber), 0, -1);
+    const userIds: string[] = await redisClient.zrange(KEY_USERLIST(roomNumber), 0, -1);
+    if (userIds.length === 0) return {};
+    
+    const userDataList: (string | null)[] = await redisClient.hmget(KEY_USER_DATA(roomNumber), ...userIds);
     const userMap: Record<number, User> = {};
-
-    for (let i = 0; i < userStringList.length; i++) {
-        const user: User = JSON.parse(userStringList[i]);
-        if (!userMap[user.i]) {
-            userMap[user.i] = user;
+    
+    for (let i = 0; i < userIds.length; i++) {
+        const userData = userDataList[i];
+        if (userData) {
+            try {
+                const user: User = JSON.parse(userData);
+                userMap[user.i] = user;
+            } catch (error) {
+                logger.error(`Failed to parse user data for ID ${userIds[i]}:`, error);
+            }
         }
     }
     return userMap;
@@ -69,14 +85,10 @@ export async function updateUserIconFromRoom(
     user: User,
     iconId: number,
 ): Promise<void> {
-    await redisClient.zrem(KEY_USERLIST(roomNumber), JSON.stringify(user));
-    
+    const userId = user.i.toString();
     user.a = iconId;
-    await redisClient.zadd(
-        KEY_USERLIST(roomNumber),
-        user.t,
-        JSON.stringify(user),
-    );
+    user.f = iconId;
+    await redisClient.hset(KEY_USER_DATA(roomNumber), userId, JSON.stringify(user));
 }
 
 export async function updateUserTeamFromRoom(
@@ -84,13 +96,10 @@ export async function updateUserTeamFromRoom(
     user: User,
     teamId: number,
 ): Promise<void> {
-    await redisClient.zrem(KEY_USERLIST(roomNumber), JSON.stringify(user));
-    
-    // 팀 ID 업데이트 후 다시 추가
+    const userId = user.i.toString();
     user.t = teamId;
-    await redisClient.zadd(
-        KEY_USERLIST(roomNumber),
-        user.t,
-        JSON.stringify(user),
-    );
+    const pipeline = redisClient.pipeline();
+    pipeline.zadd(KEY_USERLIST(roomNumber), teamId, userId);
+    pipeline.hset(KEY_USER_DATA(roomNumber), userId, JSON.stringify(user));
+    await pipeline.exec();
 }

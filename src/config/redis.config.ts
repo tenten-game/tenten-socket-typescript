@@ -16,6 +16,6 @@ export function installRedis(): void {
   });
 }
 
-export function loggingTimeStamp(key: string): void {
-  redisClient.set(key, Date.now());
+export async function loggingTimeStamp(key: string): Promise<void> {
+  await redisClient.set(key, Date.now());
 }

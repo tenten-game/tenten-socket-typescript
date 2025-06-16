@@ -38,21 +38,21 @@ export function installSocketIo(https: HttpServer): SocketServer {
   socketIO.adapter(redisAdapter);
 
   // JWT Authentication Middleware
-  socketIO.use((socket: Socket, next: any) => {
-    const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.replace('Bearer ', '');
+  // socketIO.use((socket: Socket, next: any) => {
+  //   const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.replace('Bearer ', '');
     
-    if (!token) {
-      return next(new Error('Authentication token required'));
-    }
+  //   if (!token) {
+  //     return next(new Error('Authentication token required'));
+  //   }
 
-    jwt.verify(token, config.jwtSecret, (err: any, decoded: any) => {
-      if (err) {
-        return next(new Error('Invalid authentication token'));
-      }
-      socket.data.token = decoded;
-      next();
-    });
-  });
+  //   jwt.verify(token, config.jwtSecret, (err: any, decoded: any) => {
+  //     if (err) {
+  //       return next(new Error('Invalid authentication token'));
+  //     }
+  //     socket.data.token = decoded;
+  //     next();
+  //   });
+  // });
 
   return socketIO;
 }

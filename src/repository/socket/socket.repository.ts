@@ -3,6 +3,7 @@ import { User } from "../../common/entity/user.entity";
 import { EventHostSocketData, SocketData } from "./entity/socket.entity";
 import { SocketDataType } from "../../common/enums/enums";
 
+// SET 
 export function setSocketDataUserAndRoomNumber(
   socket: Socket,
   user: User,
@@ -17,20 +18,22 @@ export function setSocketDataUserAndRoomNumber(
   socketData.hostSocketId = hostSocketId;
 }
 
+export function setEventHostSocketData(
+  socket: Socket,
+  roomNumber: string,
+): void {
+  const eventHostSocketData: EventHostSocketData = socket.data;
+  eventHostSocketData.roomNumber = roomNumber;
+  eventHostSocketData.socketDataType = SocketDataType.EVENT_HOST;
+}
+
+// GET
 export function getSocketDataUser(
   socket: Socket,
 ): User {
   const socketData: SocketData = socket.data;
   if (!socketData.user) throw new Error('유저가 없습니다.');
   return socketData.user;
-}
-
-export function getSocketDataUserId(
-  socket: Socket,
-): number {
-  const socketData: SocketData = socket.data;
-  if (!socketData.user.i) throw new Error('유저 아이디가 없습니다.');
-  return socketData.user.i;
 }
 
 export function getSocketDataRoomNumber(
@@ -41,15 +44,6 @@ export function getSocketDataRoomNumber(
   return socketData.roomNumber;
 }
 
-export function setEventHostSocketData(
-  socket: Socket,
-  roomNumber: string,
-): void {
-  const eventHostSocketData: EventHostSocketData = socket.data;
-  eventHostSocketData.roomNumber = roomNumber;
-  eventHostSocketData.socketDataType = SocketDataType.EVENT_HOST;
-}
-
 export function getEventHostSocketDataRoomNumber(
   socket: Socket,
 ): string {
@@ -58,6 +52,7 @@ export function getEventHostSocketDataRoomNumber(
   return eventHostSocketData.roomNumber;
 }
 
+// IS
 export function isNormalUser(
   socket: Socket,
 ): boolean {

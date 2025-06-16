@@ -1,14 +1,23 @@
 import { Socket, Server as SocketServer } from 'socket.io';
 import { NormalFinishScorePostRequest } from '../../application/normal/dto/request';
-import { getSocketDataRoomNumber } from '../../repository/socket/socket.repository';
+import { getSocketDataRoomNumber, getSocketDataUser } from '../../repository/socket/socket.repository';
+import { safeParseJSON } from '../../util/validation';
+import { sendGoogleChatMessage } from '../../util/webhook';
 
 export function onNormalFinishScorePost(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
   socket.on('normal.finish.score.post', async (req: any): Promise<void> => {
-    const request: NormalFinishScorePostRequest = typeof req === 'string' ? JSON.parse(req) : req;
-    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.finish.score.posted', JSON.stringify(request));
+    try {
+      const request: NormalFinishScorePostRequest = safeParseJSON(req);
+      _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.finish.score.posted', JSON.stringify({
+        userId: getSocketDataUser(socket).i,
+        score: request.score
+      }));
+    } catch (error) {
+      sendGoogleChatMessage(`Socket ${socket.id} failed to post score: ${error}`);
+    }
   });
 }
 
@@ -17,6 +26,10 @@ export function onNormalFinishExit(
   socket: Socket
 ): void {
   socket.on('normal.finish.exit', async (): Promise<void> => {
-    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.finish.exited');
+    try {
+      _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.finish.exited');
+    } catch (error) {
+      sendGoogleChatMessage(`Socket ${socket.id} failed to exit: ${error}`);
+    }
   });
 }

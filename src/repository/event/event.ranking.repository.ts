@@ -13,14 +13,15 @@ export async function processRankingsNoTotalRankings(
 ): Promise<ProcessRankingsResult> {
     const allRankings: Ranking[] = await getAllRankings(KEY_EVENT_MATCH_RANKING(roomNumber, match));
     const overallRankings: (Ranking & { rank: number })[] = assignRanks(allRankings);
-
+    const pipeline = redisClient.pipeline();
     overallRankings.forEach(ranking => {
-        redisClient.zadd(
+        pipeline.zadd(
             KEY_EVENT_MATCH_RANKING_CALCULATED(roomNumber, match),
             ranking.rank || -1,
             JSON.stringify(new User(ranking.i, ranking.a, ranking.f, ranking.t, ranking.n))
         );
     });
+    await pipeline.exec();
 
     const teamScore: TeamScore[] = [];
     const teamTopRankings: { [teamId: number]: RankingDTO[] } = {};
@@ -85,7 +86,7 @@ export async function processRankingsNoTotalRankings(
         totalBottomRankings,
         totalMiddleRankings,
     };
-    redisClient.set(KEY_EVENT_MATCH_RANKING_RESULT(roomNumber, match), JSON.stringify(response));
+    await redisClient.set(KEY_EVENT_MATCH_RANKING_RESULT(roomNumber, match), JSON.stringify(response));
     return response;
 }
 
@@ -126,16 +127,18 @@ function assignRanks(rankings: Ranking[]): (Ranking & { rank: number })[] {
     });
 }
 
-export function zaddScore(
+export async function zaddScore(
     roomNumber: string,
     score: number,
     match: number,
     user: User,
-): void {
+): Promise<void> {
     const now = Date.now();
     const userString = JSON.stringify(user);
-    redisClient.zadd(KEY_EVENT_MATCH_RANKING_POSTED_LOG(roomNumber, match), now, userString);
-    redisClient.zadd(KEY_EVENT_MATCH_RANKING(roomNumber, match), score, userString);
+    const pipeline = redisClient.pipeline();
+    pipeline.zadd(KEY_EVENT_MATCH_RANKING_POSTED_LOG(roomNumber, match), now, userString);
+    pipeline.zadd(KEY_EVENT_MATCH_RANKING(roomNumber, match), score, userString);
+    await pipeline.exec();
 }
 
 export async function zRevRank(
@@ -161,10 +164,10 @@ export async function zRevRank(
     return parseInt(ranking);
 }
 
-export function storeRankingGetLog(
+export async function storeRankingGetLog(
     roomNumber: string,
     match: number,
     user: User,
-): void {
-    redisClient.zadd(KEY_EVENT_MATCH_RANKING_GET_LOG(roomNumber, match), Date.now(), JSON.stringify(user));
+): Promise<void> {
+    await redisClient.zadd(KEY_EVENT_MATCH_RANKING_GET_LOG(roomNumber, match), Date.now(), JSON.stringify(user));
 }
