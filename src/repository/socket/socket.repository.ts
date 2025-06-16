@@ -40,7 +40,7 @@ export function getSocketDataRoomNumber(
   socket: Socket,
 ): string {
   const socketData: SocketData = socket.data;
-  if (!socketData.roomNumber) throw new Error('방 번호가 없습니다.');
+  if (!socketData.roomNumber) throw new Error('방 번호가 없습니다. - getSocketDataRoomNumber');
   return socketData.roomNumber;
 }
 
@@ -48,7 +48,7 @@ export function getEventHostSocketDataRoomNumber(
   socket: Socket,
 ): string {
   const eventHostSocketData: EventHostSocketData = socket.data;
-  if (!eventHostSocketData.roomNumber) throw new Error('방 번호가 없습니다.');
+  if (!eventHostSocketData.roomNumber) throw new Error('방 번호가 없습니다. - getEventHostSocketDataRoomNumber');
   return eventHostSocketData.roomNumber;
 }
 
@@ -72,4 +72,11 @@ export function isEventUser(
 ): boolean {
   const eventHostSocketData: EventHostSocketData = socket.data;
   return eventHostSocketData.socketDataType === SocketDataType.EVENT_USER;
+}
+
+export function hasSocketDataRoomNumber(
+  socket: Socket,
+): boolean {
+  const socketData: SocketData = socket.data;
+  return !!socketData.roomNumber;
 }

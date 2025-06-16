@@ -71,8 +71,6 @@ export async function getUserList(
     roomNumber: string,
 ): Promise<Record<number, User>> {
     const userIds: string[] = await redisClient.zrange(KEY_USERLIST(roomNumber), 0, -1);
-    if (userIds.length === 0) return {};
-    
     const userDataList: (string | null)[] = await redisClient.hmget(KEY_USER_DATA(roomNumber), ...userIds);
     const userMap: Record<number, User> = {};
     

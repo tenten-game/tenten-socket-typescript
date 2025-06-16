@@ -12,8 +12,7 @@ export async function handleLobbyUserCountGet(roomNumber: string): Promise<UserC
 
 export async function handleLobbyUserListGet(roomNumber: string): Promise<Record<number, User>> {
     await getRoom(roomNumber);
-    const userList: Record<number, User> = await getUserList(roomNumber);
-    return userList;
+    return await getUserList(roomNumber);
 }
 
 export async function handleEventLobbyUserListReset(roomNumber: string): Promise<void> {

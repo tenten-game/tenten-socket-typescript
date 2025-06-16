@@ -19,3 +19,9 @@ export class NormalInGame6040FinishResponse{
         public floorData: number,
     ) { }
 }
+
+export class NormalRoomUserTeamShuffleResponse{
+    constructor(
+        public users: User[],
+    ) { }
+}

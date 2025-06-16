@@ -5,6 +5,7 @@ import { handleEventLobbyUserListReset, handleLobbyUserCountGet, handleLobbyUser
 import { getSocketDataRoomNumber } from "../../repository/socket/socket.repository";
 import { UserCount } from "../../repository/common/dto/userCount.dto";
 import { loggingTimeStamp } from "../../config/redis.config";
+import { User } from "../../common/entity/user.entity";
 
 export function onLobbyStartGame(
   _socketServer: SocketServer,
@@ -37,7 +38,7 @@ export function onLobbyUserListGet(
 ): void {
   registerSocketEvent(socket, 'event.lobby.userList.get', async (): Promise<void> => {
     const roomNumber = getSocketDataRoomNumber(socket);
-    const users = await handleLobbyUserListGet(roomNumber);
+    const users: Record<number, User> = await handleLobbyUserListGet(roomNumber);
     socket.emit('event.lobby.userList.got', JSON.stringify(users));
   });
 }

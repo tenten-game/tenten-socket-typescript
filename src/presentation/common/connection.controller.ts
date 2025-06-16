@@ -1,7 +1,7 @@
 import { DisconnectReason, Socket, Server as SocketServer } from "socket.io";
 import { handleEventUserDisconnected, handleNormalUserDisconnected, NormalDisconnectResponse } from "../../application/common/connection.service";
 import { User } from "../../common/entity/user.entity";
-import { getEventHostSocketDataRoomNumber, getSocketDataRoomNumber, getSocketDataUser, isEventHost, isEventUser, isNormalUser } from "../../repository/socket/socket.repository";
+import { getEventHostSocketDataRoomNumber, getSocketDataRoomNumber, getSocketDataUser, hasSocketDataRoomNumber, isEventHost, isEventUser, isNormalUser } from "../../repository/socket/socket.repository";
 import { registerSocketEvent } from '../../util/error.handler';
 import { sendGoogleChatMessage } from "../../util/webhook";
 
@@ -11,6 +11,13 @@ export function onDisconnecting(
 ): void {
   registerSocketEvent(socket, 'disconnecting', async (reason: DisconnectReason): Promise<void> => {
     let roomNumber: string;
+    let hasRoomNumber: boolean = hasSocketDataRoomNumber(socket);
+
+    if (!hasRoomNumber) {
+      sendGoogleChatMessage(`Socket ${socket.id} is disconnecting without room number. Reason: ${reason}`);
+      return;
+    }
+
     if (isNormalUser(socket)) {
       roomNumber = getSocketDataRoomNumber(socket);
       const user = getSocketDataUser(socket);
@@ -30,7 +37,7 @@ export function onDisconnecting(
       const response = await handleEventUserDisconnected(roomNumber, user);
       socketServer.to(response.data.hostSocketId).emit('event.room.userDisconnected', JSON.stringify(user));
     } else {
-      // 등록된 적 없는 유저의 끊김 - 아무것도 안함
+      sendGoogleChatMessage(`Unknown socket disconnecting: ${socket.id} in room ${getSocketDataRoomNumber(socket)}`);
     }
   });
 }

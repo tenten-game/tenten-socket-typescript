@@ -1,6 +1,6 @@
 import { Socket, Server as SocketServer } from 'socket.io';
 import { NormalRoomCreateRequest, NormalRoomGameStartRequest, NormalRoomModeChangeRequest, NormalRoomUserIconChangeRequest, NormalRoomUserTeamChangeRequest } from '../../application/normal/dto/request';
-import { NormalRoomUserCountGetResponse, NormalRoomUserListGetResponse } from '../../application/normal/dto/response';
+import { NormalRoomUserCountGetResponse, NormalRoomUserListGetResponse, NormalRoomUserTeamShuffleResponse } from '../../application/normal/dto/response';
 import { handleNormalRoomChangeMode, handleNormalRoomCreate, handleNormalRoomEnter, handleNormalRoomUserCountGet, handleNormalRoomUserIconChange, handleNormalRoomUserListGet, handleNormalRoomUserTeamChange, handleNormalRoomUserTeamShuffle } from '../../application/normal/normal.room.service';
 import { User } from '../../common/entity/user.entity';
 import { SocketDataType } from '../../common/enums/enums';
@@ -86,7 +86,7 @@ export function onNormalRoomUserTeamShuffle(
   registerSocketEvent(socket, 'normal.room.user.team.shuffle', async (): Promise<void> => {
     const roomNumber: string = getSocketDataRoomNumber(socket);
     const user: User = getSocketDataUser(socket);
-    const response: Record<number, User> = await handleNormalRoomUserTeamShuffle(roomNumber, user);
+    const response: NormalRoomUserTeamShuffleResponse = await handleNormalRoomUserTeamShuffle(roomNumber, user);
     _socketServer.to(roomNumber).emit('normal.room.user.team.shuffled', JSON.stringify(response));
   });
 }
@@ -106,8 +106,8 @@ export function onNormalRoomUserListGet(
   socket: Socket
 ): void {
   registerSocketEvent(socket, 'normal.room.user.list.get', async (): Promise<void> => {
-    const userList: NormalRoomUserListGetResponse = await handleNormalRoomUserListGet(getSocketDataRoomNumber(socket));
-    socket.emit('normal.room.user.list.got', JSON.stringify(userList));
+    const response: NormalRoomUserListGetResponse = await handleNormalRoomUserListGet(getSocketDataRoomNumber(socket));
+    socket.emit('normal.room.user.list.got', JSON.stringify(response));
   });
 }
 

@@ -6,7 +6,7 @@ import { getRoom, setRoom } from "../../repository/common/room.repository";
 import { addUserToRoom, getTotalAndTeamUserCount, getUserList, updateUserIconFromRoom, updateUserTeamFromRoom, batchUpdateUserTeams } from "../../repository/common/user.repository";
 import { validateIfRequesterIsRoomMaster } from "../common/validator.service";
 import { NormalRoomCreateRequest, NormalRoomEnterRequest, NormalRoomModeChangeRequest } from "./dto/request";
-import { NormalRoomUserCountGetResponse, NormalRoomUserListGetResponse } from "./dto/response";
+import { NormalRoomUserCountGetResponse, NormalRoomUserListGetResponse, NormalRoomUserTeamShuffleResponse } from "./dto/response";
 
 export async function handleNormalRoomCreate(request: NormalRoomCreateRequest): Promise<void> {
     const user = request.user;
@@ -33,8 +33,8 @@ export async function handleNormalRoomChangeMode(
 export async function handleNormalRoomUserListGet(
     roomNumber: string,
 ): Promise<NormalRoomUserListGetResponse> {
-    const userList: Record<number, User> = await getUserList(roomNumber);
-    return new NormalRoomUserListGetResponse(Object.values(userList));
+    const userlist: Record<number, User> = await getUserList(roomNumber);
+    return new NormalRoomUserListGetResponse(Object.values(userlist));
 }
 
 export async function handleNormalRoomUserCountGet(
@@ -67,7 +67,7 @@ export async function handleNormalRoomUserTeamChange(
 export async function handleNormalRoomUserTeamShuffle(
     roomNumber: string,
     user: User,
-): Promise<Record<number, User>> {
+): Promise<NormalRoomUserTeamShuffleResponse> {
     await validateIfRequesterIsRoomMaster(user.i, roomNumber);
     const userMap: Record<number, User> = await getUserList(roomNumber);
     const users: User[] = Object.values(userMap);
@@ -88,5 +88,8 @@ export async function handleNormalRoomUserTeamShuffle(
         await batchUpdateUserTeams(roomNumber, usersToUpdate.map(({ user, targetTeam }) => ({ user, teamId: targetTeam })));
     }
 
-    return await getUserList(roomNumber);
+    const userList: Record<number, User> = await getUserList(roomNumber);
+    return new NormalRoomUserTeamShuffleResponse(
+        Object.values(userList)
+    );
 }
