@@ -12,4 +12,5 @@ export enum SocketDataType {
     EVENT_HOST = 'EVENT_HOST',
     EVENT_USER = 'EVENT_USER',
     NORMAL_USER = 'NORMAL_USER',
+    NORMAL_MASTER = 'NORMAL_MASTER',
 }

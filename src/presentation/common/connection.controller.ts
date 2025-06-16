@@ -2,7 +2,6 @@ import { DisconnectReason, Socket, Server as SocketServer } from "socket.io";
 import { handleEventUserDisconnected, handleNormalUserDisconnected, NormalDisconnectResponse } from "../../application/common/connection.service";
 import { User } from "../../common/entity/user.entity";
 import { getEventHostSocketDataRoomNumber, getSocketDataRoomNumber, getSocketDataUser, isEventHost, isEventUser, isNormalUser } from "../../repository/socket/socket.repository";
-import { logger } from '../../util/logger';
 import { sendGoogleChatMessage } from "../../util/webhook";
 
 export function onDisconnecting(
@@ -39,15 +38,6 @@ export function onDisconnecting(
   });
 }
 
-export function onDisconnect(
-  socketServer: SocketServer,
-  socket: Socket
-): void {
-  socket.on('disconnect', async (reason: string): Promise<void> => {
-    logger.info(`Socket ${socket.id} disconnected: ${reason}`);
-  });
-}
-
 export function onConnectError(
   socketServer: SocketServer,
   socket: Socket
@@ -57,11 +47,10 @@ export function onConnectError(
   });
 }
 
-export function onTest(
+export function onTest( // test. 으로 시작하는 모든건 모든 방에 전송
   socketServer: SocketServer,
   socket: Socket
 ): void {
-  // test. 으로 시작하는 모든건 모든 방에 전송
   socket.on('test.emit.realtimescore', (data: any) => {
     socketServer.to(getEventHostSocketDataRoomNumber(socket)).emit('test.realtimescore', JSON.stringify(data));
   });

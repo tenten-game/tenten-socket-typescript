@@ -28,7 +28,6 @@ export function installPrimaryCluster(): void {
 }
 
 function calculateOptimalWorkerCount(): number {
-  // 환경변수로 직접 지정 가능
   if (process.env.WORKER_COUNT) {
     const customCount = parseInt(process.env.WORKER_COUNT);
     if (customCount > 0) {

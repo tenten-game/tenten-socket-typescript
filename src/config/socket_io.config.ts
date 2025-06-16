@@ -1,7 +1,7 @@
 import { instrument } from '@socket.io/admin-ui';
 import { Server as HttpServer } from "http";
 import { Socket, Server as SocketServer } from 'socket.io';
-import { onConnectError, onDisconnect, onDisconnecting, onTest } from '../presentation/common/connection.controller';
+import { onConnectError, onDisconnecting, onTest } from '../presentation/common/connection.controller';
 import { onEventFinishExit, onEventFinishRankingGet, onEventFinishScoreGet, onEventFinishScorePost } from '../presentation/event/event.finish.controller';
 import { onEventInGameRealTimeScoreGet, onEventInGameRealTimeScorePost, onEventInGameSendSeed } from '../presentation/event/event.ingame.controller';
 import { onLobbyResetUserList, onLobbyStartGame, onLobbyUserCountGet, onLobbyUserListGet } from '../presentation/event/event.lobby.controller';
@@ -10,6 +10,7 @@ import { onNormalFinishExit, onNormalFinishScorePost } from '../presentation/nor
 import { onNormalInGame6030Do, onNormalInGame6040Do, onNormalInGame6040Finish, onNormalInGameBypass } from '../presentation/normal/normal.ingame.controller';
 import { onNormalRoomCreate, onNormalRoomEnter, onNormalRoomGameStart, onNormalRoomModeChange, onNormalRoomUserCountGet, onNormalRoomUserIconChange, onNormalRoomUserListGet, onNormalRoomUserTeamChange, onNormalRoomUserTeamShuffle } from '../presentation/normal/normal.room.controller';
 import { logger } from '../util/logger';
+import { wrapSocketHandler } from '../util/error.handler';
 import { config } from './env.config';
 import { redisAdapter } from "./redis.config";
 
@@ -66,55 +67,54 @@ export function initializeSocket(socketServer: SocketServer): void {
     handleDevelopmentEnvironment(socketServer, socket);
 
     // COMMON - CONNECTION
-    onDisconnecting(socketServer, socket);
-    onDisconnect(socketServer, socket);
-    onConnectError(socketServer, socket);
+    wrapSocketHandler(onDisconnecting)(socketServer, socket);
+    wrapSocketHandler(onConnectError)(socketServer, socket);
 
     /* ! NORMAL ! */
     // NORMAL - ROOM
-    onNormalRoomCreate(socketServer, socket);
-    onNormalRoomEnter(socketServer, socket);
-    onNormalRoomModeChange(socketServer, socket);
-    onNormalRoomUserTeamChange(socketServer, socket);
-    onNormalRoomUserIconChange(socketServer, socket);
-    onNormalRoomUserTeamShuffle(socketServer, socket);
-    onNormalRoomGameStart(socketServer, socket);
-    onNormalRoomUserListGet(socketServer, socket);
-    onNormalRoomUserCountGet(socketServer, socket);
+    wrapSocketHandler(onNormalRoomCreate)(socketServer, socket);
+    wrapSocketHandler(onNormalRoomEnter)(socketServer, socket);
+    wrapSocketHandler(onNormalRoomModeChange)(socketServer, socket);
+    wrapSocketHandler(onNormalRoomUserTeamChange)(socketServer, socket);
+    wrapSocketHandler(onNormalRoomUserIconChange)(socketServer, socket);
+    wrapSocketHandler(onNormalRoomUserTeamShuffle)(socketServer, socket);
+    wrapSocketHandler(onNormalRoomGameStart)(socketServer, socket);
+    wrapSocketHandler(onNormalRoomUserListGet)(socketServer, socket);
+    wrapSocketHandler(onNormalRoomUserCountGet)(socketServer, socket);
 
     // NORMAL - IN-GAME
-    onNormalInGameBypass(socketServer, socket);
-    onNormalInGame6030Do(socketServer, socket);
-    onNormalInGame6040Do(socketServer, socket);
-    onNormalInGame6040Finish(socketServer, socket);
+    wrapSocketHandler(onNormalInGameBypass)(socketServer, socket);
+    wrapSocketHandler(onNormalInGame6030Do)(socketServer, socket);
+    wrapSocketHandler(onNormalInGame6040Do)(socketServer, socket);
+    wrapSocketHandler(onNormalInGame6040Finish)(socketServer, socket);
 
     // NORMAL - FINISH
-    onNormalFinishScorePost(socketServer, socket);
-    onNormalFinishExit(socketServer, socket);
+    wrapSocketHandler(onNormalFinishScorePost)(socketServer, socket);
+    wrapSocketHandler(onNormalFinishExit)(socketServer, socket);
 
     /* ! EVENT ! */
     // EVENT - ROOM
-    onEventRoomCreate(socketServer, socket);
-    onEventRoomChangeMode(socketServer, socket);
-    onEventRoomHostReEnter(socketServer, socket);
-    onEventRoomEnter(socketServer, socket);
+    wrapSocketHandler(onEventRoomCreate)(socketServer, socket);
+    wrapSocketHandler(onEventRoomChangeMode)(socketServer, socket);
+    wrapSocketHandler(onEventRoomHostReEnter)(socketServer, socket);
+    wrapSocketHandler(onEventRoomEnter)(socketServer, socket);
 
     // EVENT - LOBBY
-    onLobbyStartGame(socketServer, socket);
-    onLobbyUserCountGet(socketServer, socket);
-    onLobbyUserListGet(socketServer, socket);
-    onLobbyResetUserList(socketServer, socket);
+    wrapSocketHandler(onLobbyStartGame)(socketServer, socket);
+    wrapSocketHandler(onLobbyUserCountGet)(socketServer, socket);
+    wrapSocketHandler(onLobbyUserListGet)(socketServer, socket);
+    wrapSocketHandler(onLobbyResetUserList)(socketServer, socket);
 
     // EVENT - IN_GAME
-    onEventInGameRealTimeScorePost(socketServer, socket);
-    onEventInGameRealTimeScoreGet(socketServer, socket);
-    onEventInGameSendSeed(socketServer, socket);
+    wrapSocketHandler(onEventInGameRealTimeScorePost)(socketServer, socket);
+    wrapSocketHandler(onEventInGameRealTimeScoreGet)(socketServer, socket);
+    wrapSocketHandler(onEventInGameSendSeed)(socketServer, socket);
 
     // EVENT - FINISH
-    onEventFinishScoreGet(socketServer, socket);
-    onEventFinishExit(socketServer, socket);
-    onEventFinishScorePost(socketServer, socket);
-    onEventFinishRankingGet(socketServer, socket);
+    wrapSocketHandler(onEventFinishScoreGet)(socketServer, socket);
+    wrapSocketHandler(onEventFinishExit)(socketServer, socket);
+    wrapSocketHandler(onEventFinishScorePost)(socketServer, socket);
+    wrapSocketHandler(onEventFinishRankingGet)(socketServer, socket);
     
   });
 }
