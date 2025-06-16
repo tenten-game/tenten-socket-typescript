@@ -3,7 +3,7 @@ import { User } from "../../common/entity/user.entity";
 import { RoomMode } from "../../common/enums/enums";
 import { UserCount } from "../../repository/common/dto/userCount.dto";
 import { getRoom, setRoom } from "../../repository/common/room.repository";
-import { addUserToRoom, getTotalAndTeamUserCount, getUserList, updateUserIconFromRoom, updateUserTeamFromRoom } from "../../repository/common/user.repository";
+import { addUserToRoom, getTotalAndTeamUserCount, getUserList, updateUserIconFromRoom, updateUserTeamFromRoom, batchUpdateUserTeams } from "../../repository/common/user.repository";
 import { validateIfRequesterIsRoomMaster } from "../common/validator.service";
 import { NormalRoomCreateRequest, NormalRoomEnterRequest, NormalRoomModeChangeRequest } from "./dto/request";
 import { NormalRoomUserCountGetResponse, NormalRoomUserListGetResponse } from "./dto/response";
@@ -82,10 +82,10 @@ export async function handleNormalRoomUserTeamShuffle(
         targetTeam: idx < half ? 0 : 1
     }));
 
-    for (const { user, targetTeam } of assignments) {
-        if (user.t !== targetTeam) {
-            await updateUserTeamFromRoom(roomNumber, user, targetTeam);
-        }
+    // Batch all team updates using Pipeline for better performance
+    const usersToUpdate = assignments.filter(({ user, targetTeam }) => user.t !== targetTeam);
+    if (usersToUpdate.length > 0) {
+        await batchUpdateUserTeams(roomNumber, usersToUpdate.map(({ user, targetTeam }) => ({ user, teamId: targetTeam })));
     }
 
     return await getUserList(roomNumber);

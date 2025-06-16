@@ -15,10 +15,11 @@ export async function processRankingsNoTotalRankings(
     const overallRankings: (Ranking & { rank: number })[] = assignRanks(allRankings);
     const pipeline = redisClient.pipeline();
     overallRankings.forEach(ranking => {
+        const user = new User(ranking.i, ranking.a, ranking.f, ranking.t, ranking.n);
         pipeline.zadd(
             KEY_EVENT_MATCH_RANKING_CALCULATED(roomNumber, match),
             ranking.rank || -1,
-            JSON.stringify(new User(ranking.i, ranking.a, ranking.f, ranking.t, ranking.n))
+            JSON.stringify(user)
         );
     });
     await pipeline.exec();

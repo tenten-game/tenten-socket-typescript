@@ -19,44 +19,23 @@ export async function add6040Do(roomNumber: string, user: User, floorData: numbe
     await redisClient.zadd(KEY_6040(roomNumber), 'NX', floorData, JSON.stringify(user));
 }
 
-export async function get6040Do(roomNumber: string): Promise<Record<number, User[]>> {
-    const responseMap: Record<number, User[]> = {};
+async function process6040Data(roomNumber: string): Promise<Record<number, User[]>> {
     const data = await redisClient.zrange(KEY_6040(roomNumber), 0, -1, 'WITHSCORES');
+    
+    const responseMap: Record<number, User[]> = {};
+    for (let i = 1; i <= 10; i++) responseMap[i] = [];
 
     for (let i = 0; i < data.length; i += 2) {
         const userData = JSON.parse(data[i]);
         const floorData = parseInt(data[i + 1]);
-        const existUserIds = responseMap[floorData] || [];
-        responseMap[floorData] = existUserIds.concat(userData);
-    }
-
-    for (let i = 1; i < 11; i++) {
-        if (!responseMap[i]) {
-            responseMap[i] = [];
-        }
+        responseMap[floorData] = responseMap[floorData].concat(userData);
     }
 
     return responseMap;
 }
 
 export async function get6040Finish(roomNumber: string): Promise<Record<number, User[]>> {
-    const responseMap: Record<number, User[]> = {};
-    const data = await redisClient.zrange(KEY_6040(roomNumber), 0, -1, 'WITHSCORES');
-
-    for (let i = 0; i < data.length; i += 2) {
-        const userData = JSON.parse(data[i]);
-        const floorData = parseInt(data[i + 1]);
-        const existUserIds = responseMap[floorData] || [];
-        responseMap[floorData] = existUserIds.concat(userData);
-    }
-
-    for (let i = 1; i < 11; i++) {
-        if (!responseMap[i]) {
-            responseMap[i] = [];
-        }
-    }
-
-    return responseMap;
+    return await process6040Data(roomNumber);
 }
 
 export async function remove6040(roomNumber: string): Promise<void> {

@@ -1,5 +1,4 @@
 import { config } from "../config/env.config";
-import { logger } from "./logger";
 
 export function sendGoogleChatMessage(text: string): void {
   const url = `${config.googleChatWebhookUrl}?key=${config.googleChatApiKey}&token=${config.googleChatToken}`;
@@ -19,8 +18,5 @@ export function sendGoogleChatMessage(text: string): void {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
-    })
-    .then(data => logger.info('Message sent successfully:', data))
-    .catch(error => logger.error('Error sending message:', error));
-  
+    });
 }

@@ -1,8 +1,8 @@
 import { DisconnectReason, Socket, Server as SocketServer } from "socket.io";
 import { handleEventUserDisconnected, handleNormalUserDisconnected, NormalDisconnectResponse } from "../../application/common/connection.service";
-import { registerSocketEvent } from '../../util/error.handler';
 import { User } from "../../common/entity/user.entity";
 import { getEventHostSocketDataRoomNumber, getSocketDataRoomNumber, getSocketDataUser, isEventHost, isEventUser, isNormalUser } from "../../repository/socket/socket.repository";
+import { registerSocketEvent } from '../../util/error.handler';
 import { sendGoogleChatMessage } from "../../util/webhook";
 
 export function onDisconnecting(
@@ -11,30 +11,26 @@ export function onDisconnecting(
 ): void {
   registerSocketEvent(socket, 'disconnecting', async (reason: DisconnectReason): Promise<void> => {
     let roomNumber: string;
-    try {
-      if (isNormalUser(socket)) {
-        roomNumber = getSocketDataRoomNumber(socket);
-        const user = getSocketDataUser(socket);
-        const disconnectResponse: NormalDisconnectResponse = await handleNormalUserDisconnected(roomNumber, user);        
-        if (!disconnectResponse.needToDeleteRoom) {
-          socketServer.to(roomNumber).emit('normal.connection.disconnected', JSON.stringify(user));
-          if (disconnectResponse.newMaster !== null)
-            socketServer.to(roomNumber).emit('normal.connection.master.changed', JSON.stringify({ newMaster: disconnectResponse.newMaster }));
-          if (disconnectResponse.newStarter !== null)
-            socketServer.to(roomNumber).emit('normal.connection.starter.changed', JSON.stringify({ newStarter: disconnectResponse.newStarter }));
-        }
-      } else if (isEventHost(socket)) {
-        roomNumber = getEventHostSocketDataRoomNumber(socket);
-      } else if (isEventUser(socket)) {
-        const user: User = getSocketDataUser(socket);
-        roomNumber = getSocketDataRoomNumber(socket);
-        const response = await handleEventUserDisconnected(roomNumber, user);
-        socketServer.to(response.data.hostSocketId).emit('event.room.userDisconnected', JSON.stringify(user));
-      } else { 
-        // 등록된 적 없는 유저의 끊김 - 아무것도 안함
+    if (isNormalUser(socket)) {
+      roomNumber = getSocketDataRoomNumber(socket);
+      const user = getSocketDataUser(socket);
+      const disconnectResponse: NormalDisconnectResponse = await handleNormalUserDisconnected(roomNumber, user);
+      if (!disconnectResponse.needToDeleteRoom) {
+        socketServer.to(roomNumber).emit('normal.connection.disconnected', JSON.stringify(user));
+        if (disconnectResponse.newMaster !== null)
+          socketServer.to(roomNumber).emit('normal.connection.master.changed', JSON.stringify({ newMaster: disconnectResponse.newMaster }));
+        if (disconnectResponse.newStarter !== null)
+          socketServer.to(roomNumber).emit('normal.connection.starter.changed', JSON.stringify({ newStarter: disconnectResponse.newStarter }));
       }
-    } catch (error) {
-      sendGoogleChatMessage(`Socket ${socket.id} disconnected with error: ${error}`);
+    } else if (isEventHost(socket)) {
+      roomNumber = getEventHostSocketDataRoomNumber(socket);
+    } else if (isEventUser(socket)) {
+      const user: User = getSocketDataUser(socket);
+      roomNumber = getSocketDataRoomNumber(socket);
+      const response = await handleEventUserDisconnected(roomNumber, user);
+      socketServer.to(response.data.hostSocketId).emit('event.room.userDisconnected', JSON.stringify(user));
+    } else {
+      // 등록된 적 없는 유저의 끊김 - 아무것도 안함
     }
   });
 }

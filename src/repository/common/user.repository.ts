@@ -45,12 +45,22 @@ export async function getTotalAndTeamUserCount(
     roomNumber: string,
     teamIds: number[],
 ): Promise<UserCount> {
-    const totalUserCount: number = await redisClient.zcard(KEY_USERLIST(roomNumber));
+    const pipeline = redisClient.pipeline();
+    pipeline.zcard(KEY_USERLIST(roomNumber));
+    teamIds.forEach(teamId => {
+        pipeline.zcount(KEY_USERLIST(roomNumber), teamId, teamId);
+    });
+    
+    const results = await pipeline.exec();
+    if (!results) throw new Error('Pipeline execution failed');
+    
+    const totalUserCount: number = results[0][1] as number;
     const teamUserCount: Record<number, number> = {};
-    for (const teamId of teamIds) {
-        const count: number = await redisClient.zcount(KEY_USERLIST(roomNumber), teamId, teamId);
-        teamUserCount[teamId] = count;
-    }
+    
+    teamIds.forEach((teamId, index) => {
+        teamUserCount[teamId] = results[index + 1][1] as number;
+    });
+    
     return new UserCount(
         totalUserCount,
         Object.entries(teamUserCount).map(([teamId, count]) => new TeamUserCount(parseInt(teamId), count)),
@@ -101,5 +111,23 @@ export async function updateUserTeamFromRoom(
     const pipeline = redisClient.pipeline();
     pipeline.zadd(KEY_USERLIST(roomNumber), teamId, userId);
     pipeline.hset(KEY_USER_DATA(roomNumber), userId, JSON.stringify(user));
+    await pipeline.exec();
+}
+
+export async function batchUpdateUserTeams(
+    roomNumber: string,
+    updates: Array<{ user: User; teamId: number }>,
+): Promise<void> {
+    if (updates.length === 0) return;
+    
+    const pipeline = redisClient.pipeline();
+    
+    for (const { user, teamId } of updates) {
+        const userId = user.i.toString();
+        user.t = teamId;
+        pipeline.zadd(KEY_USERLIST(roomNumber), teamId, userId);
+        pipeline.hset(KEY_USER_DATA(roomNumber), userId, JSON.stringify(user));
+    }
+    
     await pipeline.exec();
 }
