@@ -9,15 +9,11 @@ export function onNormalFinishScorePost(
   socket: Socket
 ): void {
   socket.on('normal.finish.score.post', async (req: any): Promise<void> => {
-    try {
-      const request: NormalFinishScorePostRequest = safeParseJSON(req);
-      _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.finish.score.posted', JSON.stringify({
-        userId: getSocketDataUser(socket).i,
-        score: request.score
-      }));
-    } catch (error) {
-      sendGoogleChatMessage(`Socket ${socket.id} failed to post score: ${error}`);
-    }
+    const request: NormalFinishScorePostRequest = safeParseJSON(req);
+    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.finish.score.posted', JSON.stringify({
+      userId: getSocketDataUser(socket).i,
+      score: request.score
+    }));
   });
 }
 
@@ -26,10 +22,6 @@ export function onNormalFinishExit(
   socket: Socket
 ): void {
   socket.on('normal.finish.exit', async (): Promise<void> => {
-    try {
-      _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.finish.exited');
-    } catch (error) {
-      sendGoogleChatMessage(`Socket ${socket.id} failed to exit: ${error}`);
-    }
+    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.finish.exited');
   });
 }

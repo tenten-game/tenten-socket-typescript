@@ -3,20 +3,14 @@ import { NormalInGame6040DoRequest } from '../../application/normal/dto/request'
 import { handleNormalInGame6030Do, handleNormalInGame6030DoAfter, handleNormalInGame6040Do, handleNormalInGame6040Finish, handleNormalInGame6040FinishAfter } from '../../application/normal/normal.ingame.service';
 import { User } from '../../common/entity/user.entity';
 import { getSocketDataRoomNumber, getSocketDataUser } from '../../repository/socket/socket.repository';
-import { logger } from '../../util/logger';
 import { safeParseJSON, validateRequest } from '../../util/validation';
-import { sendGoogleChatMessage } from '../../util/webhook';
 
 export function onNormalInGameBypass(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
   socket.on('normal.ingame.bypass', async (req: any): Promise<void> => {
-    try {
-      _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.ingame.bypassed', JSON.stringify(req));
-    } catch (error) {
-      sendGoogleChatMessage(`Socket ${socket.id} failed to bypass: ${error}`);
-    }
+    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.ingame.bypassed', JSON.stringify(req));
   });
 }
 
@@ -25,16 +19,12 @@ export function onNormalInGame6030Do(
   socket: Socket
 ): void {
   socket.on('normal.ingame.6030.do', async (): Promise<void> => {
-    try {
-      const roomNumber: string = getSocketDataRoomNumber(socket);
-      const response: number = await handleNormalInGame6030Do(roomNumber, getSocketDataUser(socket).i);
-      await handleNormalInGame6030DoAfter(roomNumber);
-      _socketServer.to(roomNumber).emit('normal.ingame.6030.did', JSON.stringify({
-        userId: response
-      }));
-    } catch (error) {
-      sendGoogleChatMessage(`Socket ${socket.id} failed to process 6030: ${error}`);
-    }
+    const roomNumber: string = getSocketDataRoomNumber(socket);
+    const response: number = await handleNormalInGame6030Do(roomNumber, getSocketDataUser(socket).i);
+    await handleNormalInGame6030DoAfter(roomNumber);
+    _socketServer.to(roomNumber).emit('normal.ingame.6030.did', JSON.stringify({
+      userId: response
+    }));
   });
 }
 
@@ -43,18 +33,14 @@ export function onNormalInGame6040Do(
   socket: Socket
 ): void {
   socket.on('normal.ingame.6040.do', async (req: any): Promise<void> => {
-    try {
-      const request: NormalInGame6040DoRequest = safeParseJSON(req);
-      validateRequest(request, ['floorData']);
-      const roomNumber: string = getSocketDataRoomNumber(socket)
-      await handleNormalInGame6040Do(roomNumber, getSocketDataUser(socket), request);
-      _socketServer.to(roomNumber).emit('normal.ingame.6040.did', JSON.stringify({
-        user: getSocketDataUser(socket),
-        floorData: request.floorData
-      }));
-    } catch (error) {
-      sendGoogleChatMessage(`Socket ${socket.id} failed to process 6040: ${error}`);
-    }
+    const request: NormalInGame6040DoRequest = safeParseJSON(req);
+    validateRequest(request, ['floorData']);
+    const roomNumber: string = getSocketDataRoomNumber(socket)
+    await handleNormalInGame6040Do(roomNumber, getSocketDataUser(socket), request);
+    _socketServer.to(roomNumber).emit('normal.ingame.6040.did', JSON.stringify({
+      user: getSocketDataUser(socket),
+      floorData: request.floorData
+    }));
   });
 }
 
@@ -63,13 +49,8 @@ export function onNormalInGame6040Finish(
   socket: Socket
 ): void {
   socket.on('normal.ingame.6040.finish', async (): Promise<void> => {
-    try {
-      const response: Record<number, User[]> = await handleNormalInGame6040Finish(getSocketDataRoomNumber(socket));
-      await handleNormalInGame6040FinishAfter(getSocketDataRoomNumber(socket));
-      _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.ingame.6040.finished', JSON.stringify(response));
-    } catch (error) {
-      logger.error('Error in normal.ingame.6040.finish:', error);
-      socket.emit('error', { message: 'Failed to finish 6040' });
-    }
+    const response: Record<number, User[]> = await handleNormalInGame6040Finish(getSocketDataRoomNumber(socket));
+    await handleNormalInGame6040FinishAfter(getSocketDataRoomNumber(socket));
+    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.ingame.6040.finished', JSON.stringify(response));
   });
 }
