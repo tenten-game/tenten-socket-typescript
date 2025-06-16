@@ -5,14 +5,14 @@ import { handleNormalRoomChangeMode, handleNormalRoomCreate, handleNormalRoomEnt
 import { User } from '../../common/entity/user.entity';
 import { SocketDataType } from '../../common/enums/enums';
 import { getSocketDataRoomNumber, getSocketDataUser, setSocketDataUserAndRoomNumber } from '../../repository/socket/socket.repository';
+import { registerSocketEvent } from '../../util/error.handler';
 import { safeParseJSON, validateIconId, validateRoomNumber, validateTeamId, validateUser } from '../../util/validation';
-import { sendGoogleChatMessage } from '../../util/webhook';
 
 export function onNormalRoomCreate(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('normal.room.create', async (req: any): Promise<void> => {
+  registerSocketEvent(socket, 'normal.room.create', async (req: any): Promise<void> => {
     const request: NormalRoomCreateRequest = safeParseJSON(req);
     validateRoomNumber(request.roomNumber);
     validateUser(request.user);
@@ -27,7 +27,7 @@ export function onNormalRoomEnter(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('normal.room.enter', async (req: any): Promise<void> => {
+  registerSocketEvent(socket, 'normal.room.enter', async (req: any): Promise<void> => {
     const request: NormalRoomCreateRequest = safeParseJSON(req);
     validateRoomNumber(request.roomNumber);
     validateUser(request.user);
@@ -42,7 +42,7 @@ export function onNormalRoomModeChange(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('normal.room.mode.change', async (req: any): Promise<void> => {
+  registerSocketEvent(socket, 'normal.room.mode.change', async (req: any): Promise<void> => {
     const request: NormalRoomModeChangeRequest = typeof req === 'string' ? JSON.parse(req) : req;
     await handleNormalRoomChangeMode(getSocketDataRoomNumber(socket), request);
     _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.room.mode.changed', JSON.stringify(request));
@@ -53,7 +53,7 @@ export function onNormalRoomUserIconChange(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('normal.room.user.icon.change', async (req: any): Promise<void> => {
+  registerSocketEvent(socket, 'normal.room.user.icon.change', async (req: any): Promise<void> => {
     const request: NormalRoomUserIconChangeRequest = safeParseJSON(req);
     validateIconId(request.iconId);
     await handleNormalRoomUserIconChange(getSocketDataRoomNumber(socket), getSocketDataUser(socket), request.iconId);
@@ -68,7 +68,7 @@ export function onNormalRoomUserTeamChange(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('normal.room.user.team.change', async (req: any): Promise<void> => {
+  registerSocketEvent(socket, 'normal.room.user.team.change', async (req: any): Promise<void> => {
     const request: NormalRoomUserTeamChangeRequest = safeParseJSON(req);
     validateTeamId(request.teamId);
     await handleNormalRoomUserTeamChange(getSocketDataRoomNumber(socket), getSocketDataUser(socket), request.teamId);
@@ -83,7 +83,7 @@ export function onNormalRoomUserTeamShuffle(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('normal.room.user.team.shuffle', async (): Promise<void> => {
+  registerSocketEvent(socket, 'normal.room.user.team.shuffle', async (): Promise<void> => {
     const roomNumber: string = getSocketDataRoomNumber(socket);
     const user: User = getSocketDataUser(socket);
     const response: Record<number, User> = await handleNormalRoomUserTeamShuffle(roomNumber, user);
@@ -95,7 +95,7 @@ export function onNormalRoomGameStart(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('normal.room.game.start', async (req: any): Promise<void> => {
+  registerSocketEvent(socket, 'normal.room.game.start', async (req: any): Promise<void> => {
     const request: NormalRoomGameStartRequest = safeParseJSON(req);
     _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.room.game.started', JSON.stringify(request));
   });
@@ -105,7 +105,7 @@ export function onNormalRoomUserListGet(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('normal.room.user.list.get', async (): Promise<void> => {
+  registerSocketEvent(socket, 'normal.room.user.list.get', async (): Promise<void> => {
     const userList: NormalRoomUserListGetResponse = await handleNormalRoomUserListGet(getSocketDataRoomNumber(socket));
     socket.emit('normal.room.user.list.got', JSON.stringify(userList));
   });
@@ -115,7 +115,7 @@ export function onNormalRoomUserCountGet(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('normal.room.user.count.get', async (): Promise<void> => {
+  registerSocketEvent(socket, 'normal.room.user.count.get', async (): Promise<void> => {
     const userCount: NormalRoomUserCountGetResponse = await handleNormalRoomUserCountGet(getSocketDataRoomNumber(socket));
     socket.emit('normal.room.user.count.got', JSON.stringify(userCount));
   });

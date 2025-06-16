@@ -3,13 +3,14 @@ import { NormalInGame6040DoRequest } from '../../application/normal/dto/request'
 import { handleNormalInGame6030Do, handleNormalInGame6030DoAfter, handleNormalInGame6040Do, handleNormalInGame6040Finish, handleNormalInGame6040FinishAfter } from '../../application/normal/normal.ingame.service';
 import { User } from '../../common/entity/user.entity';
 import { getSocketDataRoomNumber, getSocketDataUser } from '../../repository/socket/socket.repository';
+import { registerSocketEvent } from '../../util/error.handler';
 import { safeParseJSON, validateRequest } from '../../util/validation';
 
 export function onNormalInGameBypass(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('normal.ingame.bypass', async (req: any): Promise<void> => {
+  registerSocketEvent(socket, 'normal.ingame.bypass', async (req: any): Promise<void> => {
     _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.ingame.bypassed', JSON.stringify(req));
   });
 }
@@ -18,7 +19,7 @@ export function onNormalInGame6030Do(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('normal.ingame.6030.do', async (): Promise<void> => {
+  registerSocketEvent(socket, 'normal.ingame.6030.do', async (): Promise<void> => {
     const roomNumber: string = getSocketDataRoomNumber(socket);
     const response: number = await handleNormalInGame6030Do(roomNumber, getSocketDataUser(socket).i);
     await handleNormalInGame6030DoAfter(roomNumber);
@@ -32,7 +33,7 @@ export function onNormalInGame6040Do(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('normal.ingame.6040.do', async (req: any): Promise<void> => {
+  registerSocketEvent(socket, 'normal.ingame.6040.do', async (req: any): Promise<void> => {
     const request: NormalInGame6040DoRequest = safeParseJSON(req);
     validateRequest(request, ['floorData']);
     const roomNumber: string = getSocketDataRoomNumber(socket)
@@ -48,7 +49,7 @@ export function onNormalInGame6040Finish(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('normal.ingame.6040.finish', async (): Promise<void> => {
+  registerSocketEvent(socket, 'normal.ingame.6040.finish', async (): Promise<void> => {
     const response: Record<number, User[]> = await handleNormalInGame6040Finish(getSocketDataRoomNumber(socket));
     await handleNormalInGame6040FinishAfter(getSocketDataRoomNumber(socket));
     _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.ingame.6040.finished', JSON.stringify(response));

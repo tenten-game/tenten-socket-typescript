@@ -1,5 +1,6 @@
 import { DisconnectReason, Socket, Server as SocketServer } from "socket.io";
 import { handleEventUserDisconnected, handleNormalUserDisconnected, NormalDisconnectResponse } from "../../application/common/connection.service";
+import { registerSocketEvent } from '../../util/error.handler';
 import { User } from "../../common/entity/user.entity";
 import { getEventHostSocketDataRoomNumber, getSocketDataRoomNumber, getSocketDataUser, isEventHost, isEventUser, isNormalUser } from "../../repository/socket/socket.repository";
 import { sendGoogleChatMessage } from "../../util/webhook";
@@ -8,7 +9,7 @@ export function onDisconnecting(
   socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('disconnecting', async (reason: DisconnectReason): Promise<void> => {
+  registerSocketEvent(socket, 'disconnecting', async (reason: DisconnectReason): Promise<void> => {
     let roomNumber: string;
     try {
       if (isNormalUser(socket)) {
@@ -42,7 +43,7 @@ export function onConnectError(
   socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('connect_error', async (err: Error): Promise<void> => {
+  registerSocketEvent(socket, 'connect_error', async (err: Error): Promise<void> => {
     sendGoogleChatMessage(`CONNECT_ERROR ${socket.id} connection error: ${err.message}`);
   });
 }
@@ -51,11 +52,11 @@ export function onTest( // test. 으로 시작하는 모든건 모든 방에 전
   socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('test.emit.realtimescore', (data: any) => {
+  registerSocketEvent(socket, 'test.emit.realtimescore', (data: any) => {
     socketServer.to(getEventHostSocketDataRoomNumber(socket)).emit('test.realtimescore', JSON.stringify(data));
   });
 
-  socket.on("test.emit.finalscore", (data: any) => {
+  registerSocketEvent(socket, "test.emit.finalscore", (data: any) => {
     socketServer.to(getEventHostSocketDataRoomNumber(socket)).emit('test.finalscore', JSON.stringify(data));
   });
 }

@@ -1,5 +1,6 @@
 import { Socket, Server as SocketServer } from 'socket.io';
 import { handleEventRoomChangeMode, handleEventRoomCreate, handleEventRoomEnterAndGetHostSocketId, handleEventRoomHostReEnter } from '../../application/event/event.room.service';
+import { registerSocketEvent } from '../../util/error.handler';
 import { getEventHostSocketDataRoomNumber, setEventHostSocketData, setSocketDataUserAndRoomNumber } from '../../repository/socket/socket.repository';
 import { SocketDataType } from '../../common/enums/enums';
 import { EventRoomCreateRequest, EventRoomChangeModeRequest, EventRoomEnterRequest, EventRoomReEnterRequest } from '../../application/event/dto/request';
@@ -8,7 +9,7 @@ export function onEventRoomCreate(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('event.room.create', async (req: any): Promise<void> => {
+  registerSocketEvent(socket, 'event.room.create', async (req: any): Promise<void> => {
     const request: EventRoomCreateRequest = typeof req === 'string' ? JSON.parse(req) : req;
     socket.join(request.roomNumber);
     setEventHostSocketData(socket, request.roomNumber);
@@ -21,7 +22,7 @@ export function onEventRoomChangeMode(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('event.room.changeMode', async (req: any): Promise<void> => {
+  registerSocketEvent(socket, 'event.room.changeMode', async (req: any): Promise<void> => {
     const request: EventRoomChangeModeRequest = typeof req === 'string' ? JSON.parse(req) : req;
     const roomNumber: string = getEventHostSocketDataRoomNumber(socket);
     handleEventRoomChangeMode(request, roomNumber);
@@ -33,7 +34,7 @@ export function onEventRoomHostReEnter(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('event.room.host.reEnter', async (req: any): Promise<void> => {
+  registerSocketEvent(socket, 'event.room.host.reEnter', async (req: any): Promise<void> => {
     const request: EventRoomReEnterRequest = typeof req === 'string' ? JSON.parse(req) : req;
     socket.join(request.roomNumber);
     setEventHostSocketData(socket, request.roomNumber);
@@ -46,7 +47,7 @@ export function onEventRoomEnter(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  socket.on('event.room.enter', async (req: any): Promise<void> => {
+  registerSocketEvent(socket, 'event.room.enter', async (req: any): Promise<void> => {
     const request: EventRoomEnterRequest = typeof req === 'string' ? JSON.parse(req) : req;
     socket.join(request.roomNumber);
     const hostSocketId: string = await handleEventRoomEnterAndGetHostSocketId(request);
