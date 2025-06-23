@@ -128,7 +128,7 @@ function assignRanks(rankings: Ranking[]): (Ranking & { rank: number })[] {
     });
 }
 
-export async function zaddScore(
+export async function addUserScore(
     roomNumber: string,
     score: number,
     match: number,
@@ -142,7 +142,7 @@ export async function zaddScore(
     await pipeline.exec();
 }
 
-export async function zRevRank(
+export async function getUserRanking(
     roomNumber: string,
     match: number,
     user: User,

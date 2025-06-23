@@ -8,9 +8,11 @@ export async function handleNormalUserDisconnected(roomNumber: string, user: Use
     const isMaster = room.master == user.i;
     const isStarter = room.starter == user.i;
 
-    await deleteUserFromRoom(roomNumber, user);
-
-    const remainingUserCount = await getTotalUserCount(roomNumber);
+    // 병렬 처리로 성능 개선
+    const [, remainingUserCount] = await Promise.all([
+        deleteUserFromRoom(roomNumber, user),
+        getTotalUserCount(roomNumber)
+    ]);
 
     // 방에 아무도 없으면 방 삭제 필요
     if (remainingUserCount === 0) {

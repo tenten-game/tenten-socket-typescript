@@ -11,7 +11,7 @@ export function onEventInGameRealTimeScorePost(
 ): void {
   registerSocketEvent(socket, 'event.ingame.realTimeScore.post', async (req: any): Promise<void> => {
     const request: RealTimeScorePostRequest = typeof req === 'string' ? JSON.parse(req) : req;
-    handleEventInGameRealTimeScorePost(request, getSocketDataRoomNumber(socket), getSocketDataUser(socket).t);
+    await handleEventInGameRealTimeScorePost(request, getSocketDataRoomNumber(socket), getSocketDataUser(socket).t);
   });
 }
 

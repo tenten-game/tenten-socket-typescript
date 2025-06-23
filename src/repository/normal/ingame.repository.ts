@@ -19,16 +19,18 @@ export async function add6040Do(roomNumber: string, user: User, floorData: numbe
     await redisClient.zadd(KEY_6040(roomNumber), 'NX', floorData, JSON.stringify(user));
 }
 
+const MAX_6040_FLOOR_NUMBER = 10; // 최대 층 수
+
 async function process6040Data(roomNumber: string): Promise<Record<number, User[]>> {
     const data = await redisClient.zrange(KEY_6040(roomNumber), 0, -1, 'WITHSCORES');
     
     const responseMap: Record<number, User[]> = {};
-    for (let i = 1; i <= 10; i++) responseMap[i] = [];
+    for (let i = 1; i <= MAX_6040_FLOOR_NUMBER; i++) responseMap[i] = [];
 
     for (let i = 0; i < data.length; i += 2) {
         const userData = JSON.parse(data[i]);
         const floorData = parseInt(data[i + 1]);
-        responseMap[floorData] = responseMap[floorData].concat(userData);
+        responseMap[floorData].push(userData);
     }
 
     return responseMap;

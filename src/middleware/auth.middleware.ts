@@ -1,6 +1,6 @@
 import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
 import { Request, Response, NextFunction } from 'express';
-import { config } from "../../config/env.config";
+import { config } from "../config/env.config";
 
 const jwtSecret: string = config.jwtSecret || '';
 

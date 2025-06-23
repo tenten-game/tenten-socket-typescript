@@ -23,8 +23,12 @@ export async function deleteAllRoomData(roomNumber: string): Promise<void> {
         keys.push(...result[1]);
     } while (cursor !== '0');
     
-    // 찾은 키들을 모두 삭제
+    // Pipeline을 사용한 배치 삭제로 성능 개선
     if (keys.length > 0) {
-        await redisClient.del(...keys);
+        const pipeline = redisClient.pipeline();
+        for (const key of keys) {
+            pipeline.del(key);
+        }
+        await pipeline.exec();
     }
 }

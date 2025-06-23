@@ -41,7 +41,7 @@ export function onEventFinishScorePost(
 ): void {
   registerSocketEvent(socket, 'event.finish.score.post', async (req: any): Promise<void> => {
     const request: EventFinishScorePostRequest = typeof req === 'string' ? JSON.parse(req) : req;
-    handleEventFinishScorePost(request, getSocketDataRoomNumber(socket), getSocketDataUser(socket));
+    await handleEventFinishScorePost(request, getSocketDataRoomNumber(socket), getSocketDataUser(socket));
     socket.emit('event.finish.score.posted');
   });
 }

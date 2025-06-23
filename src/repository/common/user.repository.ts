@@ -1,8 +1,8 @@
 import { User } from "../../common/entity/user.entity";
 import { redisClient } from "../../config/redis.config";
 import { KEY_USER_DATA, KEY_USERLIST } from "../../util/redis_key_generator";
+import { sendGoogleChatMessage } from "../../util/webhook";
 import { TeamUserCount, UserCount } from "./dto/userCount.dto";
-import { logger } from "../../util/logger";
 
 export async function addUserToRoom(
     roomNumber: string,
@@ -71,6 +71,8 @@ export async function getUserList(
     roomNumber: string,
 ): Promise<Record<number, User>> {
     const userIds: string[] = await redisClient.zrange(KEY_USERLIST(roomNumber), 0, -1);
+    if (userIds.length === 0) return {};
+    
     const userDataList: (string | null)[] = await redisClient.hmget(KEY_USER_DATA(roomNumber), ...userIds);
     const userMap: Record<number, User> = {};
     
@@ -81,7 +83,7 @@ export async function getUserList(
                 const user: User = JSON.parse(userData);
                 userMap[user.i] = user;
             } catch (error) {
-                logger.error(`Failed to parse user data for ID ${userIds[i]}:`, error);
+                sendGoogleChatMessage(`Error parsing user data for ID ${userIds[i]}: ${error}`);
             }
         }
     }
