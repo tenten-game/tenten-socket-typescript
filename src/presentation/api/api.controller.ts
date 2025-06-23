@@ -38,22 +38,22 @@ export function initializeHttp(app: Application): void {
       await loggingTimeStamp(KEY_RANKING_CALULATE_BY_API(roomNumber, match));
       const ranking: ProcessRankingsResult = await processRankingsNoTotalRankings(roomNumber, matchNumber, room.event?.eventTeams.map((team) => team.id) || []);
 
-      const bodyData = ranking.teamScore.map((teamScore) => {
-        return {
-          teamId: teamScore.id,
-          totalUserScore: teamScore.averageScore,
-        };
-      });
+      // const bodyData = ranking.teamScore.map((teamScore) => {
+      //   return {
+      //     teamId: teamScore.id,
+      //     totalUserScore: teamScore.averageScore,
+      //   };
+      // });
 
-      // backup/events/{eventId}/matches/{matchId}/team-scores 으로 POST
-      await axios.post(`https://lb5.tenten.games/v1/backup/matches/${matchNumber}/team-scores`,
-        bodyData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      // // backup/events/{eventId}/matches/{matchId}/team-scores 으로 POST
+      // await axios.post(`https://lb5.tenten.games/v1/backup/matches/${matchNumber}/team-scores`,
+      //   bodyData,
+      //   {
+      //     headers: {
+      //       'Content-Type': 'application/json',
+      //     },
+      //   }
+      // );
 
       res.send(JSON.stringify(ranking));
     } else {

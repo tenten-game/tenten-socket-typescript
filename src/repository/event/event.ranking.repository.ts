@@ -11,6 +11,9 @@ export async function processRankingsNoTotalRankings(
     match: number,
     teamIds: number[],
 ): Promise<ProcessRankingsResult> {
+    const alreadyExistResponse: string | null = await redisClient.get(KEY_EVENT_MATCH_RANKING_RESULT(roomNumber, match));
+    if (alreadyExistResponse) return JSON.parse(alreadyExistResponse) as ProcessRankingsResult;
+
     const allRankings: Ranking[] = await getAllRankings(KEY_EVENT_MATCH_RANKING(roomNumber, match));
     const overallRankings: (Ranking & { rank: number })[] = assignRanks(allRankings);
     const pipeline = redisClient.pipeline();
