@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { Socket, Server as SocketServer } from 'socket.io';
 import { NormalRoomCreateRequest, NormalRoomGameStartRequest, NormalRoomModeChangeRequest, NormalRoomUserIconChangeRequest, NormalRoomUserTeamChangeRequest } from '../../application/normal/dto/request';
 import { NormalRoomUserCountGetResponse, NormalRoomUserListGetResponse, NormalRoomUserTeamShuffleResponse } from '../../application/normal/dto/response';
@@ -97,7 +98,12 @@ export function onNormalRoomGameStart(
 ): void {
   registerSocketEvent(socket, 'normal.room.game.start', async (req: any): Promise<void> => {
     const request: NormalRoomGameStartRequest = safeParseJSON(req);
-    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.room.game.started', JSON.stringify(request));
+    const matchCode: string = new Date().getTime().toString() + randomUUID().slice(0, 10);
+    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.room.game.started', JSON.stringify({
+      matchCode: matchCode,
+      gameNumber: request.gameNumber,
+      playSeconds: request.playSeconds,
+    }));
   });
 }
 

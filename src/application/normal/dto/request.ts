@@ -41,9 +41,8 @@ export class NormalRoomUserTeamChangeRequest {
 
 export class NormalRoomGameStartRequest{
     constructor(
-        public gameId: number,
-        public seconds: number,
-        public match: string,
+        public gameNumber: number,
+        public playSeconds: number,
     ) { }
 }
 
