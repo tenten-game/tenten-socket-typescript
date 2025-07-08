@@ -8,6 +8,7 @@ import { SocketDataType } from '../../common/enums/enums';
 import { getSocketDataRoomNumber, getSocketDataUser, setSocketDataUserAndRoomNumber } from '../../repository/socket/socket.repository';
 import { registerSocketEvent } from '../../util/error.handler';
 import { safeParseJSON, validateIconId, validateRoomNumber, validateTeamId, validateUser } from '../../util/validation';
+import { handleNormalUserDisconnected, NormalDisconnectResponse } from '../../application/common/connection.service';
 
 export function onNormalRoomCreate(
   _socketServer: SocketServer,
@@ -64,7 +65,14 @@ export function onNormalRoomLeave(
   registerSocketEvent(socket, 'normal.room.leave', async (req: any): Promise<void> => {
     const roomNumber = getSocketDataRoomNumber(socket);
     const user = getSocketDataUser(socket);
-    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.room.left', JSON.stringify(getSocketDataUser(socket)));
+    const disconnectResponse: NormalDisconnectResponse = await handleNormalUserDisconnected(roomNumber, user);
+    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.room.left', JSON.stringify({
+      user: getSocketDataUser(socket),
+      isMaster: disconnectResponse.isMaster,
+      isStarter: disconnectResponse.isStarter,
+      newMaster: disconnectResponse.newMaster,
+      newStarter: disconnectResponse.newStarter,
+    }));
   });
 }
 

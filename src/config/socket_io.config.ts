@@ -8,7 +8,7 @@ import { onLobbyResetUserList, onLobbyStartGame, onLobbyUserCountGet, onLobbyUse
 import { onEventRoomChangeMode, onEventRoomCreate, onEventRoomEnter, onEventRoomHostReEnter } from '../presentation/event/event.room.controller';
 import { onNormalFinishExit, onNormalFinishScorePost } from '../presentation/normal/normal.finish.controller';
 import { onNormalInGame6030Do, onNormalInGame6040Do, onNormalInGame6040Finish, onNormalBypass } from '../presentation/normal/normal.ingame.controller';
-import { onNormalRoomCreate, onNormalRoomEnter, onNormalRoomGameStart, onNormalRoomModeChange, onNormalRoomUserCountGet, onNormalRoomUserIconChange, onNormalRoomUserListGet, onNormalRoomUserTeamChange, onNormalRoomUserTeamShuffle } from '../presentation/normal/normal.room.controller';
+import { onNormalRoomCreate, onNormalRoomEnter, onNormalRoomGameStart, onNormalRoomLeave, onNormalRoomModeChange, onNormalRoomReenter, onNormalRoomUserCountGet, onNormalRoomUserIconChange, onNormalRoomUserListGet, onNormalRoomUserTeamChange, onNormalRoomUserTeamShuffle } from '../presentation/normal/normal.room.controller';
 import { logger } from '../util/logger';
 import { config } from './env.config';
 import { redisAdapter } from "./redis.config";
@@ -80,6 +80,8 @@ export function initializeSocket(socketServer: SocketServer): void {
     onNormalRoomGameStart(socketServer, socket);
     onNormalRoomUserListGet(socketServer, socket);
     onNormalRoomUserCountGet(socketServer, socket);
+    onNormalRoomLeave(socketServer, socket);
+    onNormalRoomReenter(socketServer, socket);
 
     // NORMAL - IN-GAME
     onNormalBypass(socketServer, socket);
