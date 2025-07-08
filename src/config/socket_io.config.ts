@@ -123,11 +123,12 @@ function handleDevelopmentEnvironment(
   socket: Socket
 ): void {
   if (config.env === 'development') {
-    socket.onAny((event, ...args) => logger.debug(`[ON] Socket Event: ${event}, Args: ${JSON.stringify(args)}, Socket ID: ${socket.id}, IP: ${socket.handshake.address}, UA: ${socket.handshake.headers['user-agent']}`));
-    socket.onAnyOutgoing((event, ...args) => logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}, Socket ID: ${socket.id}, IP: ${socket.handshake.address}, UA: ${socket.handshake.headers['user-agent']}`));
+    console.log('DEVELOPMENT');
+    socket.onAny((event, ...args) => console.log(`[ON] Socket Event: ${event}, Args: ${JSON.stringify(args)}, Socket ID: ${socket.id}, IP: ${socket.handshake.address}, UA: ${socket.handshake.headers['user-agent']}`));
+    socket.onAnyOutgoing((event, ...args) => console.log(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}, Socket ID: ${socket.id}, IP: ${socket.handshake.address}, UA: ${socket.handshake.headers['user-agent']}`));
     const originalEmit = socketServer.emit;
     socketServer.emit = function (event: string, ...args: unknown[]) {
-      logger.debug(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}`);
+      console.log(`[EMIT] Socket Event: ${event}, Args: ${JSON.stringify(args)}`);
       return originalEmit.apply(socketServer, [event, ...args]);
     }
   } else if (config.env === 'test') {
