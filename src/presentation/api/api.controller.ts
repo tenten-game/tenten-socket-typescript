@@ -24,6 +24,24 @@ export function initializeHttp(app: Application): void {
     res.send(eventRoomString);
   });
 
+  //
+  app.get('/rooms/:roomNumber', async function (req: Request, res: Response): Promise<void> {
+    const roomNumber: string = req.params.roomNumber;
+    const roomString: string | null = await redisClient.get(`${roomNumber}`);
+    const room = roomString ? JSON.parse(roomString) : null;
+    if (!roomString) {
+      res.status(404).send({ error: true, message: 'ROOM NOT FOUND' });
+      return;
+    }
+    res.send({
+      master: room.master,
+      mode: room.mode,
+      eventCode: null,
+      placeCode: null,
+      placeName: null,
+    });
+  });
+
   app.get('/match-results', async function (req: Request, res: Response): Promise<void> {
     res.send({ error: true, message: 'NOT IMPLEMENTED' });
   });

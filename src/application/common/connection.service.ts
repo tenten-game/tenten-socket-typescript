@@ -17,7 +17,7 @@ export async function handleNormalUserDisconnected(roomNumber: string, user: Use
     // 방에 아무도 없으면 방 삭제 필요
     if (remainingUserCount === 0) {
         await deleteAllRoomData(roomNumber);
-        return new NormalDisconnectResponse(true, null, null);
+        return new NormalDisconnectResponse(true, null, null, isMaster, isStarter);
     }
 
     const userList = await getUserList(roomNumber);
@@ -50,7 +50,9 @@ export async function handleNormalUserDisconnected(roomNumber: string, user: Use
     return new NormalDisconnectResponse(
         false,
         masterChanged ? newMaster : null,
-        starterChanged ? newStarter : null
+        starterChanged ? newStarter : null,
+        isMaster,
+        isStarter
     );
 }
 
@@ -93,6 +95,8 @@ export class NormalDisconnectResponse {
         public needToDeleteRoom: boolean,
         public newMaster: number | null,
         public newStarter: number | null,
+        public isMaster: boolean,
+        public isStarter: boolean,
     ) { }
 }
 

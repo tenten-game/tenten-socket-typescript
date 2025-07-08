@@ -6,12 +6,12 @@ import { getSocketDataRoomNumber, getSocketDataUser } from '../../repository/soc
 import { registerSocketEvent } from '../../util/error.handler';
 import { safeParseJSON, validateRequest } from '../../util/validation';
 
-export function onNormalInGameBypass(
+export function onNormalBypass(
   _socketServer: SocketServer,
   socket: Socket
 ): void {
-  registerSocketEvent(socket, 'normal.ingame.bypass', async (req: any): Promise<void> => {
-    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.ingame.bypassed', JSON.stringify(req));
+  registerSocketEvent(socket, 'normal.bypass', async (req: any): Promise<void> => {
+    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.bypassed', JSON.stringify(req));
   });
 }
 

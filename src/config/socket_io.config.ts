@@ -7,7 +7,7 @@ import { onEventInGameRealTimeScoreGet, onEventInGameRealTimeScorePost, onEventI
 import { onLobbyResetUserList, onLobbyStartGame, onLobbyUserCountGet, onLobbyUserListGet } from '../presentation/event/event.lobby.controller';
 import { onEventRoomChangeMode, onEventRoomCreate, onEventRoomEnter, onEventRoomHostReEnter } from '../presentation/event/event.room.controller';
 import { onNormalFinishExit, onNormalFinishScorePost } from '../presentation/normal/normal.finish.controller';
-import { onNormalInGame6030Do, onNormalInGame6040Do, onNormalInGame6040Finish, onNormalInGameBypass } from '../presentation/normal/normal.ingame.controller';
+import { onNormalInGame6030Do, onNormalInGame6040Do, onNormalInGame6040Finish, onNormalBypass } from '../presentation/normal/normal.ingame.controller';
 import { onNormalRoomCreate, onNormalRoomEnter, onNormalRoomGameStart, onNormalRoomModeChange, onNormalRoomUserCountGet, onNormalRoomUserIconChange, onNormalRoomUserListGet, onNormalRoomUserTeamChange, onNormalRoomUserTeamShuffle } from '../presentation/normal/normal.room.controller';
 import { logger } from '../util/logger';
 import { config } from './env.config';
@@ -82,7 +82,7 @@ export function initializeSocket(socketServer: SocketServer): void {
     onNormalRoomUserCountGet(socketServer, socket);
 
     // NORMAL - IN-GAME
-    onNormalInGameBypass(socketServer, socket);
+    onNormalBypass(socketServer, socket);
     onNormalInGame6030Do(socketServer, socket);
     onNormalInGame6040Do(socketServer, socket);
     onNormalInGame6040Finish(socketServer, socket);

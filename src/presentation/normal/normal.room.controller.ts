@@ -39,6 +39,32 @@ export function onNormalRoomEnter(
   });
 }
 
+export function onNormalRoomReenter(
+  _socketServer: SocketServer,
+  socket: Socket
+): void {
+  registerSocketEvent(socket, 'normal.room.reenter', async (req: any): Promise<void> => {
+    const request: NormalRoomCreateRequest = safeParseJSON(req);
+    validateRoomNumber(request.roomNumber);
+    validateUser(request.user);
+    socket.join(request.roomNumber);
+    setSocketDataUserAndRoomNumber(socket, request.user, request.roomNumber, socket.id, SocketDataType.NORMAL_USER);
+    await handleNormalRoomEnter(request);
+    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.room.reentered', JSON.stringify(getSocketDataUser(socket)));
+  });
+}
+
+export function onNormalRoomLeave(
+  _socketServer: SocketServer,
+  socket: Socket
+): void {
+  registerSocketEvent(socket, 'normal.room.leave', async (req: any): Promise<void> => {
+    const roomNumber = getSocketDataRoomNumber(socket);
+    const user = getSocketDataUser(socket);
+    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.room.left', JSON.stringify(getSocketDataUser(socket)));
+  });
+}
+
 export function onNormalRoomModeChange(
   _socketServer: SocketServer,
   socket: Socket

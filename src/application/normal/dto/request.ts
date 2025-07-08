@@ -23,6 +23,7 @@ export class NormalRoomModeChangeRequest {
 
 export class NormalFinishScorePostRequest {
     constructor(
+        public matchCode: string,
         public score: number,
     ) { }
 }

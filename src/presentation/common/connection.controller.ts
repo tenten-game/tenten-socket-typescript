@@ -23,11 +23,13 @@ export function onDisconnecting(
       const user = getSocketDataUser(socket);
       const disconnectResponse: NormalDisconnectResponse = await handleNormalUserDisconnected(roomNumber, user);
       if (!disconnectResponse.needToDeleteRoom) {
-        socketServer.to(roomNumber).emit('normal.connection.disconnected', JSON.stringify(user));
-        if (disconnectResponse.newMaster !== null)
-          socketServer.to(roomNumber).emit('normal.connection.master.changed', JSON.stringify({ newMaster: disconnectResponse.newMaster }));
-        if (disconnectResponse.newStarter !== null)
-          socketServer.to(roomNumber).emit('normal.connection.starter.changed', JSON.stringify({ newStarter: disconnectResponse.newStarter }));
+        socketServer.to(roomNumber).emit('normal.connection.disconnected', JSON.stringify({
+          user: user,
+          isMaster: disconnectResponse.isMaster,
+          isStarter: disconnectResponse.isStarter,
+          newMaster: disconnectResponse.newMaster,
+          newStarter: disconnectResponse.newStarter,
+        }));
       }
     } else if (isEventHost(socket)) {
       roomNumber = getEventHostSocketDataRoomNumber(socket);

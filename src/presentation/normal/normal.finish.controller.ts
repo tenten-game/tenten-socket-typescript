@@ -12,6 +12,7 @@ export function onNormalFinishScorePost(
     const request: NormalFinishScorePostRequest = safeParseJSON(req);
     _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.finish.score.posted', JSON.stringify({
       userId: getSocketDataUser(socket).i,
+      matchCode: request.matchCode,
       score: request.score
     }));
   });
