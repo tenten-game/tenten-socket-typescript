@@ -35,7 +35,10 @@ export function onNormalRoomEnter(
     socket.join(request.roomNumber);
     setSocketDataUserAndRoomNumber(socket, request.user, request.roomNumber, socket.id, SocketDataType.NORMAL_USER);
     await handleNormalRoomEnter(request);
-    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.room.entered', JSON.stringify(getSocketDataUser(socket)));
+    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.room.entered', {
+      user: getSocketDataUser(socket),
+      roomNumber: request.roomNumber,
+    });
   });
 }
 
