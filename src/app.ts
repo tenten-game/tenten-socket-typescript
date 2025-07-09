@@ -21,3 +21,5 @@ if (cluster.isPrimary) { // 부모 프로세스
   initializeFirebase();
   initializeSocket(socketServer);
 }
+
+compileErrorPart
