@@ -52,3 +52,4 @@ export class NormalInGame6040DoRequest{
         public floorData: number,
     ) { }
 }
+  

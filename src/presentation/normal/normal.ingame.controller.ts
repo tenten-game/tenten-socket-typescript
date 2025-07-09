@@ -4,7 +4,8 @@ import { handleNormalInGame6030Do, handleNormalInGame6030DoAfter, handleNormalIn
 import { User } from '../../common/entity/user.entity';
 import { getSocketDataRoomNumber, getSocketDataUser } from '../../repository/socket/socket.repository';
 import { registerSocketEvent } from '../../util/error.handler';
-import { safeParseJSON, validateRequest } from '../../util/validation';
+import { NormalInGame6030DoResponse, NormalInGame6040DoResponse } from '../../application/normal/dto/response';
+import { safeParseJSON } from '../../application/common/validation.service';
 
 export function onNormalBypass(
   _socketServer: SocketServer,
@@ -21,11 +22,9 @@ export function onNormalInGame6030Do(
 ): void {
   registerSocketEvent(socket, 'normal.ingame.6030.do', async (): Promise<void> => {
     const roomNumber: string = getSocketDataRoomNumber(socket);
-    const response: number = await handleNormalInGame6030Do(roomNumber, getSocketDataUser(socket).i);
+    const response: NormalInGame6030DoResponse = await handleNormalInGame6030Do(roomNumber, getSocketDataUser(socket).i);
     await handleNormalInGame6030DoAfter(roomNumber);
-    _socketServer.to(roomNumber).emit('normal.ingame.6030.did', JSON.stringify({
-      userId: response
-    }));
+    _socketServer.to(roomNumber).emit('normal.ingame.6030.did', JSON.stringify(response));
   });
 }
 
@@ -35,13 +34,9 @@ export function onNormalInGame6040Do(
 ): void {
   registerSocketEvent(socket, 'normal.ingame.6040.do', async (req: any): Promise<void> => {
     const request: NormalInGame6040DoRequest = safeParseJSON(req);
-    validateRequest(request, ['floorData']);
     const roomNumber: string = getSocketDataRoomNumber(socket)
-    await handleNormalInGame6040Do(roomNumber, getSocketDataUser(socket), request);
-    _socketServer.to(roomNumber).emit('normal.ingame.6040.did', JSON.stringify({
-      user: getSocketDataUser(socket),
-      floorData: request.floorData
-    }));
+    const response: NormalInGame6040DoResponse = await handleNormalInGame6040Do(roomNumber, getSocketDataUser(socket), request);
+    _socketServer.to(roomNumber).emit('normal.ingame.6040.did', JSON.stringify(response));
   });
 }
 

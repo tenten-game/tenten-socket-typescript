@@ -1,8 +1,9 @@
 import { Socket, Server as SocketServer } from 'socket.io';
 import { NormalFinishScorePostRequest } from '../../application/normal/dto/request';
-import { getSocketDataRoomNumber, getSocketDataUser } from '../../repository/socket/socket.repository';
+import { getSocketDataRoomNumber, getSocketDataUser, getSocketDataUserId } from '../../repository/socket/socket.repository';
 import { registerSocketEvent } from '../../util/error.handler';
-import { safeParseJSON } from '../../util/validation';
+import { NormalFinishScorePostResponse } from '../../application/normal/dto/response';
+import { safeParseJSON } from '../../application/common/validation.service';
 
 export function onNormalFinishScorePost(
   _socketServer: SocketServer,
@@ -10,11 +11,8 @@ export function onNormalFinishScorePost(
 ): void {
   registerSocketEvent(socket, 'normal.finish.score.post', async (req: any): Promise<void> => {
     const request: NormalFinishScorePostRequest = safeParseJSON(req);
-    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.finish.score.posted', JSON.stringify({
-      userId: getSocketDataUser(socket).i,
-      matchCode: request.matchCode,
-      score: request.score
-    }));
+    const response: NormalFinishScorePostResponse = new NormalFinishScorePostResponse(getSocketDataUserId(socket), request.matchCode, request.score)
+    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.finish.score.posted', JSON.stringify(response));
   });
 }
 

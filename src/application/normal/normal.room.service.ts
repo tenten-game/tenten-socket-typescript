@@ -4,9 +4,9 @@ import { RoomMode } from "../../common/enums/enums";
 import { UserCount } from "../../repository/common/dto/userCount.dto";
 import { getRoom, setRoom } from "../../repository/common/room.repository";
 import { addUserToRoom, getTotalAndTeamUserCount, getUserList, updateUserIconFromRoom, updateUserTeamFromRoom, batchUpdateUserTeams } from "../../repository/common/user.repository";
-import { validateIfRequesterIsRoomMaster } from "../common/validator.service";
+import { validateIfRequesterIsRoomMaster } from "../common/validation.service";
 import { NormalRoomCreateRequest, NormalRoomEnterRequest, NormalRoomModeChangeRequest } from "./dto/request";
-import { NormalRoomUserCountGetResponse, NormalRoomUserListGetResponse, NormalRoomUserTeamShuffleResponse } from "./dto/response";
+import { NormalRoomUserIconChangeResponse, NormalRoomUserTeamChangeResponse, NormalRoomUserCountGetResponse, NormalRoomUserListGetResponse, NormalRoomUserTeamShuffleResponse, NormalRoomEnterResponse } from "./dto/response";
 
 export async function handleNormalRoomCreate(request: NormalRoomCreateRequest, hostSocketId: string): Promise<void> {
     const user = request.user;
@@ -15,8 +15,9 @@ export async function handleNormalRoomCreate(request: NormalRoomCreateRequest, h
     await addUserToRoom(request.roomNumber, user);
 }
 
-export async function handleNormalRoomEnter(request: NormalRoomEnterRequest): Promise<void> {
+export async function handleNormalRoomEnter(request: NormalRoomEnterRequest): Promise<NormalRoomEnterResponse> {
     await addUserToRoom(request.roomNumber, request.user);
+    return new NormalRoomEnterResponse(request.user, request.roomNumber);
 }
 
 export async function handleNormalRoomChangeMode(
@@ -50,16 +51,18 @@ export async function handleNormalRoomUserIconChange(
     roomNumber: string,
     user: User,
     iconId: number,
-): Promise<void> {
+): Promise<NormalRoomUserIconChangeResponse> {
     await updateUserIconFromRoom(roomNumber, user, iconId);
+    return new NormalRoomUserIconChangeResponse(user.i, iconId);
 }
 
 export async function handleNormalRoomUserTeamChange(
     roomNumber: string,
     user: User,
     teamId: number,
-): Promise<void> {
+): Promise<NormalRoomUserTeamChangeResponse> {
     await updateUserTeamFromRoom(roomNumber, user, teamId);
+    return new NormalRoomUserTeamChangeResponse(user.i, teamId);
 }
 
 export async function handleNormalRoomUserTeamShuffle(

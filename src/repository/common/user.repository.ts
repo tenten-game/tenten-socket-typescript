@@ -8,16 +8,14 @@ export async function addUserToRoom(
     roomNumber: string,
     user: User,
 ): Promise<void> {
-    const userId = user.i.toString();
-    const pipeline = redisClient.pipeline();
-
     const teamCount = await getTotalAndTeamUserCount(roomNumber, [-1, -2]);
     const minTeam = teamCount.teamUserCount.reduce((prev, curr) => {
         return prev.count < curr.count ? prev : curr;
     });
-    
-    pipeline.zadd(KEY_USERLIST(roomNumber), minTeam.teamId, userId);
-    pipeline.hset(KEY_USER_DATA(roomNumber), userId, JSON.stringify(user));
+
+    const pipeline = redisClient.pipeline();
+    pipeline.zadd(KEY_USERLIST(roomNumber), minTeam.teamId, user.i);
+    pipeline.hset(KEY_USER_DATA(roomNumber), user.i, JSON.stringify(user));
     await pipeline.exec();
 }
 

@@ -36,6 +36,14 @@ export function getSocketDataUser(
   return socketData.user;
 }
 
+export function getSocketDataUserId(
+  socket: Socket,
+): number {
+  const socketData: SocketData = socket.data;
+  if (!socketData.user) throw new Error('유저가 없습니다.');
+  return socketData.user.i;
+}
+
 export function getSocketDataRoomNumber(
   socket: Socket,
 ): string {
