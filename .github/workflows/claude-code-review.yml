@@ -1,0 +1,87 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # model: "claude-opus-4-20250514"
+          direct_prompt: |
+            ## TenTen Socket.IO 서버 코드 리뷰 가이드라인
+
+            ### 프로젝트 컨텍스트
+            이 프로젝트는 실시간 게임 서버로 Socket.IO와 Redis를 사용하는 TypeScript 기반 애플리케이션입니다.
+            Layered Architecture (Presentation → Application → Repository)를 따르고 있습니다.
+
+            ### 중점 리뷰 사항
+
+            #### 1. 아키텍처 준수 확인
+            - Controller에 비즈니스 로직이 포함되어 있지 않은지 검증
+            - Service 레이어가 적절히 활용되고 있는지 확인
+            - Repository가 데이터 접근만 담당하는지 검증
+            - 레이어 간 의존성이 단방향인지 확인
+
+            #### 2. 성능 및 확장성
+            - Redis KEYS 명령어 사용 여부 (반드시 SCAN 사용)
+            - Redis Pipeline 활용 여부 (배치 작업 시)
+            - 블로킹 작업이 이벤트 루프를 막지 않는지 확인
+            - 메모리 누수 가능성 검토
+
+            #### 3. 보안 검토
+            - 하드코딩된 민감 정보 확인
+            - 환경 변수 적절히 사용하는지 검증
+            - 입력값 검증 누락 확인
+            - JWT 인증 적절히 구현되었는지 확인
+
+            #### 4. 에러 처리
+            - 모든 비동기 작업에 try-catch 블록 존재 여부
+            - 에러 로깅이 적절한지 확인
+            - 사용자에게 적절한 에러 메시지 반환하는지 검증
+
+            #### 5. 코드 품질
+            - TypeScript 타입 안전성 확인
+            - 변수명/함수명이 명확한지 검토
+            - 코드 중복 확인
+            - 주석이 필요한 복잡한 로직에 적절한 설명 존재 여부
+
+            #### 6. Redis 사용 패턴
+            - redis_key_generator.ts 사용 여부
+            - 키 네이밍 컨벤션 준수 ({roomNumber}_USERLIST 등)
+            - 트랜잭션이 필요한 곳에 Pipeline 사용 여부
+
+            #### 7. 로깅 일관성
+            - console.log 대신 Winston logger 사용 권장
+            - 로그 레벨 적절성 (error, warn, info, debug)
+            - 민감한 정보가 로그에 포함되지 않는지 확인
+
+            ### 리뷰 피드백 방식
+            1. 문제점은 심각도와 함께 명시 (🔴 Critical, 🟡 Warning, 🟢 Suggestion)
+            2. 구체적인 개선 코드 예시 제공
+            3. 성능 영향이 있는 경우 정량적 설명 포함
+            4. 보안 이슈는 최우선으로 지적
+
+            ### 참고사항
+            - 이 프로젝트는 현재 테스트 프레임워크가 없음
+            - JWT 인증이 주석 처리되어 있으나 향후 활성화 예정
+            - 최근 User 저장소 구조가 ID 기반으로 재설계됨
+
+            모든 리뷰 코멘트는 한국어로 작성해주세요.

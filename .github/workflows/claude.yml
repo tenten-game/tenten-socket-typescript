@@ -1,0 +1,90 @@
+name: Claude Code
+
+on:
+  issue_comment:
+    types: [ created ]
+  pull_request_review_comment:
+    types: [ created ]
+  issues:
+    types: [ opened, assigned ]
+  pull_request_review:
+    types: [ submitted ]
+
+jobs:
+  claude:
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code
+        id: claude
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          custom_instructions: |
+            ## TenTen Socket.IO 서버 프로젝트 가이드라인
+
+            ### 프로젝트 구조 이해
+            이 프로젝트는 Layered Architecture를 따르고 있습니다:
+            - **Presentation Layer** (`src/presentation/`): Socket.IO 이벤트 핸들러와 HTTP 컨트롤러
+            - **Application Layer** (`src/application/`): 비즈니스 로직 서비스
+            - **Repository Layer** (`src/repository/`): Redis 데이터 액세스 레이어
+            
+            ### 기술 스택
+            - Node.js + TypeScript
+            - Socket.IO (실시간 통신)
+            - Redis (주 데이터 저장소)
+            - PM2 (프로세스 관리)
+            - Winston (로깅)
+
+            ### 코딩 표준 및 규칙
+            1. **에러 처리**: 모든 비동기 작업에 try-catch 블록 필수
+            2. **Redis 작업**: 
+              - KEYS 명령어 대신 SCAN 사용
+              - Pipeline으로 배치 작업 최적화
+              - redis_key_generator.ts 사용하여 일관된 키 생성
+            3. **로깅**: console.log 대신 Winston logger 사용
+            4. **타입 안전성**: TypeScript strict 모드 준수
+            5. **환경 변수**: 모든 설정은 env.config.ts를 통해 관리
+
+            ### 아키텍처 원칙
+            - 각 레이어의 책임 명확히 구분
+            - Controller는 요청/응답 처리만 담당
+            - Service에서 비즈니스 로직 구현
+            - Repository는 데이터 접근만 담당
+            - 순환 의존성 금지
+
+            ### 보안 고려사항
+            - 민감한 정보는 절대 하드코딩 금지
+            - 모든 입력값 검증 필수
+            - JWT 인증 미들웨어 활용
+
+            ### 성능 최적화
+            - Redis 블로킹 작업 회피
+            - 워커 프로세스 적절히 활용
+            - 메모리 사용량 모니터링
+
+            ### 현재 주요 이슈
+            1. 에러 핸들링 부족 (많은 컨트롤러에서)
+            2. User entity의 암호화된 속성명 (i, a, f, t, n)
+            3. 일관되지 않은 로깅 방식
+
+            ### 작업 시 주의사항
+            - CLAUDE.md 파일의 개발 진행 상황 참고
+            - 기존 코드 패턴 따르기
+            - 테스트 프레임워크가 아직 없으므로 수동 테스트 필요
+            
+            모든 응답은 한국어로 작성해주세요.
