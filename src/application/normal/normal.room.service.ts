@@ -39,7 +39,7 @@ export async function handleNormalRoomUserListGet(
 export async function handleNormalRoomUserCountGet(
     roomNumber: string,
 ): Promise<NormalRoomUserCountGetResponse> {
-    const teamUserCount: UserCount = await getTotalAndTeamUserCount(roomNumber, [0, 1]);
+    const teamUserCount: UserCount = await getTotalAndTeamUserCount(roomNumber, [-1, -2]);
 
     return new NormalRoomUserCountGetResponse(
         teamUserCount.totalUserCount,
@@ -61,6 +61,7 @@ export async function handleNormalRoomUserTeamChange(
     userId: number,
     teamId: number,
 ): Promise<NormalRoomUserTeamChangeResponse> {
+    if (teamId !== -1 && teamId !== -2) throw new Error("Invalid team ID. Must be -1 or -2.");
     await updateUserTeamFromRoom(roomNumber, userId, teamId);
     return new NormalRoomUserTeamChangeResponse(userId, teamId);
 }
@@ -80,7 +81,7 @@ export async function handleNormalRoomUserTeamShuffle(
     const half = Math.floor(users.length / 2);
     const assignments = users.map((u, idx) => ({
         user: u,
-        targetTeam: idx < half ? -1 : -2
+        targetTeam: idx < half ? -2 : -1
     }));
 
     const usersToUpdate = assignments.filter(({ user, targetTeam }) => user.t !== targetTeam);
