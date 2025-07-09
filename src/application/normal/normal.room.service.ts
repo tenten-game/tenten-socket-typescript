@@ -80,7 +80,7 @@ export async function handleNormalRoomUserTeamShuffle(
     const half = Math.floor(users.length / 2);
     const assignments = users.map((u, idx) => ({
         user: u,
-        targetTeam: idx < half ? 0 : 1
+        targetTeam: idx < half ? -1 : -2
     }));
 
     // Batch all team updates using Pipeline for better performance
