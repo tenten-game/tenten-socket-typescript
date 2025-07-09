@@ -7,9 +7,8 @@ import { onEventInGameRealTimeScoreGet, onEventInGameRealTimeScorePost, onEventI
 import { onLobbyResetUserList, onLobbyStartGame, onLobbyUserCountGet, onLobbyUserListGet } from '../presentation/event/event.lobby.controller';
 import { onEventRoomChangeMode, onEventRoomCreate, onEventRoomEnter, onEventRoomHostReEnter } from '../presentation/event/event.room.controller';
 import { onNormalFinishExit, onNormalFinishScorePost } from '../presentation/normal/normal.finish.controller';
-import { onNormalInGame6030Do, onNormalInGame6040Do, onNormalInGame6040Finish, onNormalBypass } from '../presentation/normal/normal.ingame.controller';
+import { onNormalBypass, onNormalInGame6030Do, onNormalInGame6040Do, onNormalInGame6040Finish } from '../presentation/normal/normal.ingame.controller';
 import { onNormalRoomCreate, onNormalRoomEnter, onNormalRoomGameStart, onNormalRoomLeave, onNormalRoomModeChange, onNormalRoomReenter, onNormalRoomUserCountGet, onNormalRoomUserIconChange, onNormalRoomUserListGet, onNormalRoomUserTeamChange, onNormalRoomUserTeamShuffle } from '../presentation/normal/normal.room.controller';
-import { logger } from '../util/logger';
 import { config } from './env.config';
 import { redisAdapter } from "./redis.config";
 
@@ -71,20 +70,20 @@ export function initializeSocket(socketServer: SocketServer): void {
 
     /* ! NORMAL ! */
     // NORMAL - ROOM
-    onNormalRoomCreate(socketServer, socket); // 방 생성
-    onNormalRoomEnter(socketServer, socket); // 방 입장
-    onNormalRoomReenter(socketServer, socket); // 방 재입장 (끊긴사람)
-    onNormalRoomLeave(socketServer, socket); // 방 나가기
+    onNormalRoomCreate(socketServer, socket); // 방 생성 - normal.room.create // normal.room.created
+    onNormalRoomEnter(socketServer, socket); // 방 입장 - normal.room.enter // normal.room.entered
+    onNormalRoomReenter(socketServer, socket); // 방 재입장 (끊긴사람) - normal.room.reenter // normal.room.reentered
+    onNormalRoomLeave(socketServer, socket); // 방 나가기 - normal.room.leave // normal.room.left
 
-    onNormalRoomModeChange(socketServer, socket); // 방 모드 변경
-    onNormalRoomUserTeamChange(socketServer, socket); // 방 유저 팀 변경
-    onNormalRoomUserIconChange(socketServer, socket); // 방 유저 스킨 변경
-    onNormalRoomUserTeamShuffle(socketServer, socket); // 방 유저 팀 셔플
+    onNormalRoomModeChange(socketServer, socket); // 방 모드 변경 - normal.room.mode.change // normal.room.mode.changed
+    onNormalRoomUserTeamChange(socketServer, socket); // 방 유저 팀 변경 - normal.room.user.team.change // normal.room.user.team.changed
+    onNormalRoomUserIconChange(socketServer, socket); // 방 유저 스킨 변경 - normal.room.user.icon.change // normal.room.user.icon.changed
+    onNormalRoomUserTeamShuffle(socketServer, socket); // 방 유저 팀 셔플 - normal.room.user.team.shuffle // normal.room.user.team.shuffled
 
-    onNormalRoomGameStart(socketServer, socket); // 방 게임 시작
+    onNormalRoomGameStart(socketServer, socket); // 방 게임 시작 - normal.room.game.start // normal.room.game.started
 
-    onNormalRoomUserListGet(socketServer, socket); // 방 유저 리스트 가져오기
-    onNormalRoomUserCountGet(socketServer, socket); // 방 유저 수 가져오기
+    onNormalRoomUserListGet(socketServer, socket); // 방 유저 리스트 가져오기 - normal.room.user.list.get // normal.room.user.list.got
+    onNormalRoomUserCountGet(socketServer, socket); // 방 유저 수 가져오기 - normal.room.user.count.get // normal.room.user.count.got
 
     // NORMAL - IN-GAME
     onNormalBypass(socketServer, socket);
