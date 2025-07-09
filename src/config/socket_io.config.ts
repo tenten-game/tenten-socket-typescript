@@ -71,17 +71,20 @@ export function initializeSocket(socketServer: SocketServer): void {
 
     /* ! NORMAL ! */
     // NORMAL - ROOM
-    onNormalRoomCreate(socketServer, socket);
-    onNormalRoomEnter(socketServer, socket);
-    onNormalRoomModeChange(socketServer, socket);
-    onNormalRoomUserTeamChange(socketServer, socket);
-    onNormalRoomUserIconChange(socketServer, socket);
-    onNormalRoomUserTeamShuffle(socketServer, socket);
-    onNormalRoomGameStart(socketServer, socket);
-    onNormalRoomUserListGet(socketServer, socket);
-    onNormalRoomUserCountGet(socketServer, socket);
-    onNormalRoomLeave(socketServer, socket);
-    onNormalRoomReenter(socketServer, socket);
+    onNormalRoomCreate(socketServer, socket); // 방 생성
+    onNormalRoomEnter(socketServer, socket); // 방 입장
+    onNormalRoomReenter(socketServer, socket); // 방 재입장 (끊긴사람)
+    onNormalRoomLeave(socketServer, socket); // 방 나가기
+
+    onNormalRoomModeChange(socketServer, socket); // 방 모드 변경
+    onNormalRoomUserTeamChange(socketServer, socket); // 방 유저 팀 변경
+    onNormalRoomUserIconChange(socketServer, socket); // 방 유저 스킨 변경
+    onNormalRoomUserTeamShuffle(socketServer, socket); // 방 유저 팀 셔플
+
+    onNormalRoomGameStart(socketServer, socket); // 방 게임 시작
+
+    onNormalRoomUserListGet(socketServer, socket); // 방 유저 리스트 가져오기
+    onNormalRoomUserCountGet(socketServer, socket); // 방 유저 수 가져오기
 
     // NORMAL - IN-GAME
     onNormalBypass(socketServer, socket);
