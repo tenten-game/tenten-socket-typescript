@@ -27,21 +27,20 @@ export function setEventHostSocketData(
   eventHostSocketData.socketDataType = SocketDataType.EVENT_HOST;
 }
 
-// GET
-export function getSocketDataUser(
-  socket: Socket,
-): User {
-  const socketData: SocketData = socket.data;
-  if (!socketData.user) throw new Error('유저가 없습니다.');
-  return socketData.user;
-}
-
 export function getSocketDataUserId(
   socket: Socket,
 ): number {
   const socketData: SocketData = socket.data;
   if (!socketData.user) throw new Error('유저가 없습니다.');
   return socketData.user.i;
+}
+
+export function getSocketDataTeamIdOnlyUseInEvent(
+  socket: Socket,
+): number {
+  const socketData: SocketData = socket.data;
+  if (!socketData.user) throw new Error('유저가 없습니다.');
+  return socketData.user.t;
 }
 
 export function getSocketDataRoomNumber(

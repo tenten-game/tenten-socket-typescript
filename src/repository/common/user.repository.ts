@@ -1,8 +1,15 @@
+import { safeParseJSON } from "../../application/common/validation.service";
 import { User } from "../../common/entity/user.entity";
 import { redisClient } from "../../config/redis.config";
 import { KEY_USER_DATA, KEY_USERLIST } from "../../util/redis_key_generator";
 import { sendGoogleChatMessage } from "../../util/webhook";
 import { TeamUserCount, UserCount } from "./dto/userCount.dto";
+
+export async function getUser(roomNumber: string, userId: number): Promise<User> {
+    const userData = await redisClient.hget(KEY_USER_DATA(roomNumber), userId.toString());
+    if (!userData) throw new Error(`User with ID ${userId} not found in room ${roomNumber}`);
+    return safeParseJSON(userData) as User;
+}
 
 export async function addUserToRoom(
     roomNumber: string,
@@ -22,12 +29,11 @@ export async function addUserToRoom(
 
 export async function deleteUserFromRoom(
     roomNumber: string,
-    user: User,
+    userId: number,
 ): Promise<void> {
-    const userId = user.i.toString();
     const pipeline = redisClient.pipeline();
     pipeline.zrem(KEY_USERLIST(roomNumber), userId);
-    pipeline.hdel(KEY_USER_DATA(roomNumber), userId);
+    pipeline.hdel(KEY_USER_DATA(roomNumber), userId.toString());
     await pipeline.exec();
 }
 
@@ -97,10 +103,10 @@ export async function getUserList(
 
 export async function updateUserIconFromRoom(
     roomNumber: string,
-    user: User,
+    userId: number,
     iconId: number,
 ): Promise<void> {
-    const userId = user.i.toString();
+    const user = await getUser(roomNumber, userId);
     user.a = iconId;
     user.f = iconId;
     await redisClient.hset(KEY_USER_DATA(roomNumber), userId, JSON.stringify(user));
@@ -108,10 +114,10 @@ export async function updateUserIconFromRoom(
 
 export async function updateUserTeamFromRoom(
     roomNumber: string,
-    user: User,
+    userId: number,
     teamId: number,
 ): Promise<void> {
-    const userId = user.i.toString();
+    const user = await getUser(roomNumber, userId);
     user.t = teamId;
     const pipeline = redisClient.pipeline();
     pipeline.zadd(KEY_USERLIST(roomNumber), teamId, userId);

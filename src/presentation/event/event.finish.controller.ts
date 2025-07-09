@@ -3,7 +3,7 @@ import { EventFinishRankingGetRequest, EventFinishScoreGetRequest, EventFinishSc
 import { registerSocketEvent } from '../../util/error.handler';
 import { handleEventFinishRankingGet, handleEventFinishScoreGet, handleEventFinishScorePost } from '../../application/event/event.finish.service';
 import { ProcessRankingsResult } from '../../repository/event/entity/rankings.entity';
-import { getSocketDataRoomNumber, getSocketDataUser } from '../../repository/socket/socket.repository';
+import { getSocketDataRoomNumber, getSocketDataUserId } from '../../repository/socket/socket.repository';
 
 export function onEventFinishScoreGet(
   _socketServer: SocketServer,
@@ -41,7 +41,7 @@ export function onEventFinishScorePost(
 ): void {
   registerSocketEvent(socket, 'event.finish.score.post', async (req: any): Promise<void> => {
     const request: EventFinishScorePostRequest = typeof req === 'string' ? JSON.parse(req) : req;
-    await handleEventFinishScorePost(request, getSocketDataRoomNumber(socket), getSocketDataUser(socket));
+    await handleEventFinishScorePost(request, getSocketDataRoomNumber(socket), getSocketDataUserId(socket));
     socket.emit('event.finish.score.posted');
   });
 }
@@ -52,7 +52,7 @@ export function onEventFinishRankingGet(
 ): void {
   registerSocketEvent(socket, 'event.finish.ranking.get', async (req: any): Promise<void> => {
     const request: EventFinishRankingGetRequest = typeof req === 'string' ? JSON.parse(req) : req;
-    const myRanking: number = await handleEventFinishRankingGet(getSocketDataRoomNumber(socket), getSocketDataUser(socket), request.match);
+    const myRanking: number = await handleEventFinishRankingGet(getSocketDataRoomNumber(socket), getSocketDataUserId(socket), request.match);
     socket.emit('event.finish.ranking.got', JSON.stringify({ ranking: myRanking }));
   });
 }

@@ -49,27 +49,27 @@ export async function handleNormalRoomUserCountGet(
 
 export async function handleNormalRoomUserIconChange(
     roomNumber: string,
-    user: User,
+    userId: number,
     iconId: number,
 ): Promise<NormalRoomUserIconChangeResponse> {
-    await updateUserIconFromRoom(roomNumber, user, iconId);
-    return new NormalRoomUserIconChangeResponse(user.i, iconId);
+    await updateUserIconFromRoom(roomNumber, userId, iconId);
+    return new NormalRoomUserIconChangeResponse(userId, iconId);
 }
 
 export async function handleNormalRoomUserTeamChange(
     roomNumber: string,
-    user: User,
+    userId: number,
     teamId: number,
 ): Promise<NormalRoomUserTeamChangeResponse> {
-    await updateUserTeamFromRoom(roomNumber, user, teamId);
-    return new NormalRoomUserTeamChangeResponse(user.i, teamId);
+    await updateUserTeamFromRoom(roomNumber, userId, teamId);
+    return new NormalRoomUserTeamChangeResponse(userId, teamId);
 }
 
 export async function handleNormalRoomUserTeamShuffle(
     roomNumber: string,
-    user: User,
+    userId: number,
 ): Promise<NormalRoomUserTeamShuffleResponse> {
-    await validateIfRequesterIsRoomMaster(user.i, roomNumber);
+    await validateIfRequesterIsRoomMaster(userId, roomNumber);
     const userMap: Record<number, User> = await getUserList(roomNumber);
     const users: User[] = Object.values(userMap);
     for (let i = users.length - 1; i > 0; i--) {

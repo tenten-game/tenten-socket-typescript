@@ -1,23 +1,24 @@
 import { Room } from "../../common/entity/room.entity";
 import { User } from "../../common/entity/user.entity";
 import { deleteAllRoomData, getRoom, setRoom } from "../../repository/common/room.repository";
-import { deleteUserFromRoom, getTotalUserCount, getUserList } from "../../repository/common/user.repository";
+import { deleteUserFromRoom, getTotalUserCount, getUser, getUserList } from "../../repository/common/user.repository";
 
-export async function handleNormalUserDisconnected(roomNumber: string, user: User): Promise<NormalDisconnectResponse> {
+export async function handleNormalUserDisconnected(roomNumber: string, userId: number): Promise<NormalDisconnectResponse> {
     const room: Room = await getRoom(roomNumber);
-    const isMaster = room.master == user.i;
-    const isStarter = room.starter == user.i;
+    const isMaster = room.master == userId;
+    const isStarter = room.starter == userId;
+    const user: User = await getUser(roomNumber, userId);
 
     // 병렬 처리로 성능 개선
     const [, remainingUserCount] = await Promise.all([
-        deleteUserFromRoom(roomNumber, user),
+        deleteUserFromRoom(roomNumber, userId),
         getTotalUserCount(roomNumber)
     ]);
 
     // 방에 아무도 없으면 방 삭제 필요
     if (remainingUserCount === 0) {
         await deleteAllRoomData(roomNumber);
-        return new NormalDisconnectResponse(true, null, null, isMaster, isStarter);
+        return new NormalDisconnectResponse(user, null, null, isMaster, isStarter, true);
     }
 
     const userList = await getUserList(roomNumber);
@@ -48,11 +49,12 @@ export async function handleNormalUserDisconnected(roomNumber: string, user: Use
     }
 
     return new NormalDisconnectResponse(
-        false,
+        user,
         masterChanged ? newMaster : null,
         starterChanged ? newStarter : null,
         isMaster,
-        isStarter
+        isStarter,
+        false,
     );
 }
 
@@ -67,8 +69,8 @@ export async function handleEventHostDisconnected(roomNumber: string): Promise<D
     );
 }
 
-export async function handleEventUserDisconnected(roomNumber: string, user: User): Promise<DisconnectResponse> {
-    await deleteUserFromRoom(roomNumber, user);
+export async function handleEventUserDisconnected(roomNumber: string, userId: number): Promise<DisconnectResponse> {
+    await deleteUserFromRoom(roomNumber, userId);
     const totalUser = await getTotalUserCount(roomNumber);
     const room = await getRoom(roomNumber);
     const needToDeleteRoom = totalUser == 0 && room.event?.isHostConnected == false;
@@ -92,11 +94,12 @@ export class EventUserDisconnectedResponse {
 
 export class NormalDisconnectResponse {
     constructor(
-        public needToDeleteRoom: boolean,
+        public user: User,
         public newMaster: number | null,
         public newStarter: number | null,
         public isMaster: boolean,
         public isStarter: boolean,
+        public needToDeleteRoom: boolean,
     ) { }
 }
 

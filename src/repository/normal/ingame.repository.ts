@@ -1,6 +1,7 @@
 import { User } from "../../common/entity/user.entity";
 import { redisClient } from "../../config/redis.config";
 import { KEY_6030, KEY_6040 } from "../../util/redis_key_generator";
+import { getUser } from "../common/user.repository";
 
 export async function add6030Do(roomNumber: string, userId: number): Promise<void> {
     await redisClient.zadd(KEY_6030(roomNumber), 'NX', new Date().getTime(), userId.toString());
@@ -15,7 +16,8 @@ export async function remove6030(roomNumber: string): Promise<void> {
     await redisClient.del(KEY_6030(roomNumber));
 }
 
-export async function add6040Do(roomNumber: string, user: User, floorData: number): Promise<void> {
+export async function add6040Do(roomNumber: string, userId: number, floorData: number): Promise<void> {
+    const user: User = await getUser(roomNumber, userId);
     await redisClient.zadd(KEY_6040(roomNumber), 'NX', floorData, JSON.stringify(user));
 }
 

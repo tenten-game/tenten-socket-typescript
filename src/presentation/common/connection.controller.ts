@@ -1,9 +1,10 @@
 import { DisconnectReason, Socket, Server as SocketServer } from "socket.io";
 import { handleEventUserDisconnected, handleNormalUserDisconnected, NormalDisconnectResponse } from "../../application/common/connection.service";
 import { User } from "../../common/entity/user.entity";
-import { getEventHostSocketDataRoomNumber, getSocketDataRoomNumber, getSocketDataUser, hasSocketDataRoomNumber, isEventHost, isEventUser, isNormalUser } from "../../repository/socket/socket.repository";
+import { getEventHostSocketDataRoomNumber, getSocketDataRoomNumber, getSocketDataUserId, hasSocketDataRoomNumber, isEventHost, isEventUser, isNormalUser } from "../../repository/socket/socket.repository";
 import { registerSocketEvent } from '../../util/error.handler';
 import { sendGoogleChatMessage } from "../../util/webhook";
+import { getUser } from "../../repository/common/user.repository";
 
 export function onDisconnecting(
   socketServer: SocketServer,
@@ -20,23 +21,14 @@ export function onDisconnecting(
 
     if (isNormalUser(socket)) {
       roomNumber = getSocketDataRoomNumber(socket);
-      const user = getSocketDataUser(socket);
-      const disconnectResponse: NormalDisconnectResponse = await handleNormalUserDisconnected(roomNumber, user);
-      if (!disconnectResponse.needToDeleteRoom) {
-        socketServer.to(roomNumber).emit('normal.connection.disconnected', JSON.stringify({
-          user: user,
-          isMaster: disconnectResponse.isMaster,
-          isStarter: disconnectResponse.isStarter,
-          newMaster: disconnectResponse.newMaster,
-          newStarter: disconnectResponse.newStarter,
-        }));
-      }
+      const disconnectResponse: NormalDisconnectResponse = await handleNormalUserDisconnected(roomNumber, getSocketDataUserId(socket));
+      socketServer.to(roomNumber).emit('normal.connection.disconnected', JSON.stringify(disconnectResponse));
     } else if (isEventHost(socket)) {
       roomNumber = getEventHostSocketDataRoomNumber(socket);
     } else if (isEventUser(socket)) {
-      const user: User = getSocketDataUser(socket);
       roomNumber = getSocketDataRoomNumber(socket);
-      const response = await handleEventUserDisconnected(roomNumber, user);
+      const user: User = await getUser(roomNumber, getSocketDataUserId(socket));
+      const response = await handleEventUserDisconnected(roomNumber, getSocketDataUserId(socket));
       socketServer.to(response.data.hostSocketId).emit('event.room.userDisconnected', JSON.stringify(user));
     } else {
       sendGoogleChatMessage(`Unknown socket disconnecting: ${socket.id} in room ${getSocketDataRoomNumber(socket)}`);

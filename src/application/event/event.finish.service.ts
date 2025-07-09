@@ -12,12 +12,12 @@ export async function handleEventFinishScoreGet(roomNumber: string, match: numbe
     return ranking;
 }
 
-export async function handleEventFinishScorePost(request: EventFinishScorePostRequest, roomNumber: string, user: User): Promise<void> {
-    await addUserScore(roomNumber, request.score, request.match, user);
+export async function handleEventFinishScorePost(request: EventFinishScorePostRequest, roomNumber: string, userId: number): Promise<void> {
+    await addUserScore(roomNumber, request.score, request.match, userId);
 }
 
-export async function handleEventFinishRankingGet(roomNumber: string, user: User, match: number): Promise<number> {
-    storeRankingGetLog(roomNumber, match, user);
-    const myranking = await getUserRanking(roomNumber, match, user);
+export async function handleEventFinishRankingGet(roomNumber: string, userId: number, match: number): Promise<number> {
+    storeRankingGetLog(roomNumber, match, userId);
+    const myranking = await getUserRanking(roomNumber, match, userId);
     return myranking;
 }

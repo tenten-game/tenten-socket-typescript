@@ -1,14 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import { Socket, Server as SocketServer } from 'socket.io';
 import { handleNormalUserDisconnected, NormalDisconnectResponse } from '../../application/common/connection.service';
+import { safeParseJSON } from '../../application/common/validation.service';
 import { NormalRoomCreateRequest, NormalRoomGameStartRequest, NormalRoomModeChangeRequest, NormalRoomUserIconChangeRequest, NormalRoomUserTeamChangeRequest } from '../../application/normal/dto/request';
 import { NormalRoomEnterResponse, NormalRoomGameStartResponse, NormalRoomLeaveResponse, NormalRoomReenterResponse, NormalRoomUserCountGetResponse, NormalRoomUserIconChangeResponse, NormalRoomUserListGetResponse, NormalRoomUserTeamChangeResponse, NormalRoomUserTeamShuffleResponse } from '../../application/normal/dto/response';
 import { handleNormalRoomChangeMode, handleNormalRoomCreate, handleNormalRoomEnter, handleNormalRoomUserCountGet, handleNormalRoomUserIconChange, handleNormalRoomUserListGet, handleNormalRoomUserTeamChange, handleNormalRoomUserTeamShuffle } from '../../application/normal/normal.room.service';
-import { User } from '../../common/entity/user.entity';
 import { SocketDataType } from '../../common/enums/enums';
-import { getSocketDataRoomNumber, getSocketDataUser, setSocketDataUserAndRoomNumber } from '../../repository/socket/socket.repository';
+import { getSocketDataRoomNumber, getSocketDataUserId, setSocketDataUserAndRoomNumber } from '../../repository/socket/socket.repository';
 import { registerSocketEvent } from '../../util/error.handler';
-import { safeParseJSON } from '../../application/common/validation.service';
 
 export function onNormalRoomCreate(
   _socketServer: SocketServer,
@@ -55,9 +54,8 @@ export function onNormalRoomLeave(
 ): void {
   registerSocketEvent(socket, 'normal.room.leave', async (): Promise<void> => {
     const roomNumber = getSocketDataRoomNumber(socket);
-    const user = getSocketDataUser(socket);
-    const disconnectResponse: NormalDisconnectResponse = await handleNormalUserDisconnected(roomNumber, user);
-    const response = new NormalRoomLeaveResponse(user, disconnectResponse.isMaster, disconnectResponse.isStarter, disconnectResponse.newMaster, disconnectResponse.newStarter);
+    const disconnectResponse: NormalDisconnectResponse = await handleNormalUserDisconnected(roomNumber, getSocketDataUserId(socket));
+    const response = new NormalRoomLeaveResponse(disconnectResponse.user, disconnectResponse.isMaster, disconnectResponse.isStarter, disconnectResponse.newMaster, disconnectResponse.newStarter);
     _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.room.left', JSON.stringify(response));
   });
 }
@@ -79,7 +77,7 @@ export function onNormalRoomUserIconChange(
 ): void {
   registerSocketEvent(socket, 'normal.room.user.icon.change', async (req: any): Promise<void> => {
     const request: NormalRoomUserIconChangeRequest = safeParseJSON(req);
-    const response: NormalRoomUserIconChangeResponse = await handleNormalRoomUserIconChange(getSocketDataRoomNumber(socket), getSocketDataUser(socket), request.iconId);
+    const response: NormalRoomUserIconChangeResponse = await handleNormalRoomUserIconChange(getSocketDataRoomNumber(socket), getSocketDataUserId(socket), request.iconId);
     _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.room.user.icon.changed', JSON.stringify(response));
   });
 }
@@ -90,7 +88,7 @@ export function onNormalRoomUserTeamChange(
 ): void {
   registerSocketEvent(socket, 'normal.room.user.team.change', async (req: any): Promise<void> => {
     const request: NormalRoomUserTeamChangeRequest = safeParseJSON(req);
-    const response: NormalRoomUserTeamChangeResponse = await handleNormalRoomUserTeamChange(getSocketDataRoomNumber(socket), getSocketDataUser(socket), request.teamId);
+    const response: NormalRoomUserTeamChangeResponse = await handleNormalRoomUserTeamChange(getSocketDataRoomNumber(socket), getSocketDataUserId(socket), request.teamId);
     _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.room.user.team.changed', JSON.stringify(response));
   });
 }
@@ -101,8 +99,7 @@ export function onNormalRoomUserTeamShuffle(
 ): void {
   registerSocketEvent(socket, 'normal.room.user.team.shuffle', async (): Promise<void> => {
     const roomNumber: string = getSocketDataRoomNumber(socket);
-    const user: User = getSocketDataUser(socket);
-    const response: NormalRoomUserTeamShuffleResponse = await handleNormalRoomUserTeamShuffle(roomNumber, user);
+    const response: NormalRoomUserTeamShuffleResponse = await handleNormalRoomUserTeamShuffle(roomNumber, getSocketDataUserId(socket));
     _socketServer.to(roomNumber).emit('normal.room.user.team.shuffled', JSON.stringify(response));
   });
 }

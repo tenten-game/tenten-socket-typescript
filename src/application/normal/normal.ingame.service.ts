@@ -13,9 +13,9 @@ export async function handleNormalInGame6030DoAfter(roomNumber: string): Promise
     await remove6030(roomNumber);
 }
 
-export async function handleNormalInGame6040Do(roomNumber: string, user: User, request: NormalInGame6040DoRequest): Promise<NormalInGame6040DoResponse> {
-    await add6040Do(roomNumber, user, request.floorData);
-    return new NormalInGame6040DoResponse(user.i, request.floorData);
+export async function handleNormalInGame6040Do(roomNumber: string, userId: number, request: NormalInGame6040DoRequest): Promise<NormalInGame6040DoResponse> {
+    await add6040Do(roomNumber, userId, request.floorData);
+    return new NormalInGame6040DoResponse(userId, request.floorData);
 }
 
 export async function handleNormalInGame6040Finish(roomNumber: string): Promise<Record<number, User[]>> {

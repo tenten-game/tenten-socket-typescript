@@ -2,6 +2,7 @@ import { User } from '../../common/entity/user.entity';
 import { redisClient } from '../../config/redis.config';
 import { saveLogToFirestore } from '../../util/firestore';
 import { KEY_EVENT_MATCH_RANKING, KEY_EVENT_MATCH_RANKING_CALCULATED, KEY_EVENT_MATCH_RANKING_GET_LOG, KEY_EVENT_MATCH_RANKING_POSTED_LOG, KEY_EVENT_MATCH_RANKING_RESULT } from '../../util/redis_key_generator';
+import { getUser } from '../common/user.repository';
 import { ProcessRankingsResult, Ranking, RankingDTO, TeamScore } from './entity/rankings.entity';
 
 const TOP_N = 10; 
@@ -135,9 +136,10 @@ export async function addUserScore(
     roomNumber: string,
     score: number,
     match: number,
-    user: User,
+    userId: number,
 ): Promise<void> {
     const now = Date.now();
+    const user: User = await getUser(roomNumber, userId);
     const userString = JSON.stringify(user);
     const pipeline = redisClient.pipeline();
     pipeline.zadd(KEY_EVENT_MATCH_RANKING_POSTED_LOG(roomNumber, match), now, userString);
@@ -148,8 +150,9 @@ export async function addUserScore(
 export async function getUserRanking(
     roomNumber: string,
     match: number,
-    user: User,
+    userId: number,
 ): Promise<number> {
+    const user: User = await getUser(roomNumber, userId);
     const ranking: string = await redisClient.zscore(KEY_EVENT_MATCH_RANKING_CALCULATED(roomNumber, match), JSON.stringify(user)) || "-1";
     if (ranking === "-1") {
         const random = Math.floor(Math.random() * 1000000);
@@ -171,7 +174,7 @@ export async function getUserRanking(
 export async function storeRankingGetLog(
     roomNumber: string,
     match: number,
-    user: User,
+    userId: number,
 ): Promise<void> {
-    await redisClient.zadd(KEY_EVENT_MATCH_RANKING_GET_LOG(roomNumber, match), Date.now(), JSON.stringify(user));
+    await redisClient.zadd(KEY_EVENT_MATCH_RANKING_GET_LOG(roomNumber, match), Date.now(), JSON.stringify(userId));
 }

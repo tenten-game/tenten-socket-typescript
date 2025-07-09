@@ -3,7 +3,7 @@ import { RealTimeScoreGetRequest, RealTimeScorePostRequest } from "../../applica
 import { registerSocketEvent } from '../../util/error.handler';
 import { RealTimeScoreGetResponse } from "../../application/event/dto/response";
 import { handleEventInGameRealTimeScoreGet, handleEventInGameRealTimeScorePost } from "../../application/event/event.ingame.service";
-import { getSocketDataRoomNumber, getSocketDataUser } from "../../repository/socket/socket.repository";
+import { getSocketDataRoomNumber, getSocketDataTeamIdOnlyUseInEvent } from "../../repository/socket/socket.repository";
 
 export function onEventInGameRealTimeScorePost(
   _socketServer: SocketServer,
@@ -11,7 +11,7 @@ export function onEventInGameRealTimeScorePost(
 ): void {
   registerSocketEvent(socket, 'event.ingame.realTimeScore.post', async (req: any): Promise<void> => {
     const request: RealTimeScorePostRequest = typeof req === 'string' ? JSON.parse(req) : req;
-    await handleEventInGameRealTimeScorePost(request, getSocketDataRoomNumber(socket), getSocketDataUser(socket).t);
+    await handleEventInGameRealTimeScorePost(request, getSocketDataRoomNumber(socket), getSocketDataTeamIdOnlyUseInEvent(socket));
   });
 }
 
