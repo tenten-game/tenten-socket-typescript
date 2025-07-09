@@ -68,7 +68,7 @@ export class NormalRoomUserIconChangeResponse {
 export class NormalRoomUserTeamChangeResponse {
     constructor(
         public userId: number,
-        public iconId: number,
+        public teamId: number,
     ) { }
 }
 

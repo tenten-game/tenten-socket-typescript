@@ -3,10 +3,10 @@ import { User } from "../../common/entity/user.entity";
 import { RoomMode } from "../../common/enums/enums";
 import { UserCount } from "../../repository/common/dto/userCount.dto";
 import { getRoom, setRoom } from "../../repository/common/room.repository";
-import { addUserToRoom, getTotalAndTeamUserCount, getUserList, updateUserIconFromRoom, updateUserTeamFromRoom, batchUpdateUserTeams } from "../../repository/common/user.repository";
+import { addUserToRoom, batchUpdateUserTeams, getTotalAndTeamUserCount, getUserList, updateUserIconFromRoom, updateUserTeamFromRoom } from "../../repository/common/user.repository";
 import { validateIfRequesterIsRoomMaster } from "../common/validation.service";
 import { NormalRoomCreateRequest, NormalRoomEnterRequest, NormalRoomModeChangeRequest } from "./dto/request";
-import { NormalRoomUserIconChangeResponse, NormalRoomUserTeamChangeResponse, NormalRoomUserCountGetResponse, NormalRoomUserListGetResponse, NormalRoomUserTeamShuffleResponse, NormalRoomEnterResponse } from "./dto/response";
+import { NormalRoomEnterResponse, NormalRoomUserCountGetResponse, NormalRoomUserIconChangeResponse, NormalRoomUserListGetResponse, NormalRoomUserTeamChangeResponse, NormalRoomUserTeamShuffleResponse } from "./dto/response";
 
 export async function handleNormalRoomCreate(request: NormalRoomCreateRequest, hostSocketId: string): Promise<void> {
     const user = request.user;
@@ -83,7 +83,6 @@ export async function handleNormalRoomUserTeamShuffle(
         targetTeam: idx < half ? -1 : -2
     }));
 
-    // Batch all team updates using Pipeline for better performance
     const usersToUpdate = assignments.filter(({ user, targetTeam }) => user.t !== targetTeam);
     if (usersToUpdate.length > 0) {
         await batchUpdateUserTeams(roomNumber, usersToUpdate.map(({ user, targetTeam }) => ({ user, teamId: targetTeam })));
