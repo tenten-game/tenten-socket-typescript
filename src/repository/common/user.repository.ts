@@ -14,6 +14,7 @@ export async function addUserToRoom(
     });
 
     const pipeline = redisClient.pipeline();
+    user.t = minTeam.teamId;
     pipeline.zadd(KEY_USERLIST(roomNumber), minTeam.teamId, user.i);
     pipeline.hset(KEY_USER_DATA(roomNumber), user.i, JSON.stringify(user));
     await pipeline.exec();
