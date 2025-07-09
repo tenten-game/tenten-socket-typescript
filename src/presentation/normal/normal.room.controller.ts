@@ -20,7 +20,7 @@ export function onNormalRoomCreate(
     validateUser(request.user);
     socket.join(request.roomNumber);
     setSocketDataUserAndRoomNumber(socket, request.user, request.roomNumber, '', SocketDataType.NORMAL_USER);
-    await handleNormalRoomCreate(request);
+    await handleNormalRoomCreate(request, socket.id);
     socket.emit('normal.room.created');
   });
 }

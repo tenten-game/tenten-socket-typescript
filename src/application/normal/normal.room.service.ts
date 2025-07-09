@@ -8,11 +8,9 @@ import { validateIfRequesterIsRoomMaster } from "../common/validator.service";
 import { NormalRoomCreateRequest, NormalRoomEnterRequest, NormalRoomModeChangeRequest } from "./dto/request";
 import { NormalRoomUserCountGetResponse, NormalRoomUserListGetResponse, NormalRoomUserTeamShuffleResponse } from "./dto/response";
 
-export async function handleNormalRoomCreate(request: NormalRoomCreateRequest): Promise<void> {
+export async function handleNormalRoomCreate(request: NormalRoomCreateRequest, hostSocketId: string): Promise<void> {
     const user = request.user;
-    const room = new Room(
-        "", user.i, user.i, RoomMode.INDIVIDUAL, null
-    )
+    const room = new Room(hostSocketId, user.i, user.i, RoomMode.INDIVIDUAL, null);
     await setRoom(request.roomNumber, room);
     await addUserToRoom(request.roomNumber, user);
 }
