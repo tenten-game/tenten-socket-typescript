@@ -143,6 +143,6 @@ export function onNormalRoomStarterChange(
   registerSocketEvent(socket, 'normal.room.starter.change', async (req: any): Promise<void> => {
     const request: NormalRoomStarterChangeRequest = safeParseJSON(req);
     await handleNormalRoomStarterChange(getSocketDataRoomNumber(socket), request);
-    socket.emit('normal.room.starter.changed', JSON.stringify(request));
+    _socketServer.to(getSocketDataRoomNumber(socket)).emit('normal.room.starter.changed', JSON.stringify(request));
   });
 }
