@@ -3,8 +3,8 @@ import { Socket, Server as SocketServer } from 'socket.io';
 import { handleNormalUserDisconnected, NormalDisconnectResponse } from '../../application/common/connection.service';
 import { safeParseJSON } from '../../application/common/validation.service';
 import { NormalRoomCreateRequest, NormalRoomGameStartRequest, NormalRoomModeChangeRequest, NormalRoomUserIconChangeRequest, NormalRoomUserTeamChangeRequest } from '../../application/normal/dto/request';
-import { NormalRoomEnterResponse, NormalRoomGameStartResponse, NormalRoomLeaveResponse, NormalRoomReenterResponse, NormalRoomUserCountGetResponse, NormalRoomUserIconChangeResponse, NormalRoomUserListGetResponse, NormalRoomUserTeamChangeResponse, NormalRoomUserTeamShuffleResponse } from '../../application/normal/dto/response';
-import { handleNormalRoomChangeMode, handleNormalRoomCreate, handleNormalRoomEnter, handleNormalRoomUserCountGet, handleNormalRoomUserIconChange, handleNormalRoomUserListGet, handleNormalRoomUserTeamChange, handleNormalRoomUserTeamShuffle } from '../../application/normal/normal.room.service';
+import { NormalRoomEnterResponse, NormalRoomGameStartResponse, NormalRoomLeaveResponse, NormalRoomReenterResponse, NormalRoomStarterChangeRequest, NormalRoomUserCountGetResponse, NormalRoomUserIconChangeResponse, NormalRoomUserListGetResponse, NormalRoomUserTeamChangeResponse, NormalRoomUserTeamShuffleResponse } from '../../application/normal/dto/response';
+import { handleNormalRoomChangeMode, handleNormalRoomCreate, handleNormalRoomEnter, handleNormalRoomStarterChange, handleNormalRoomUserCountGet, handleNormalRoomUserIconChange, handleNormalRoomUserListGet, handleNormalRoomUserTeamChange, handleNormalRoomUserTeamShuffle } from '../../application/normal/normal.room.service';
 import { SocketDataType } from '../../common/enums/enums';
 import { getSocketDataRoomNumber, getSocketDataUserId, setSocketDataUserAndRoomNumber } from '../../repository/socket/socket.repository';
 import { registerSocketEvent } from '../../util/error.handler';
@@ -133,5 +133,16 @@ export function onNormalRoomUserCountGet(
   registerSocketEvent(socket, 'normal.room.user.count.get', async (): Promise<void> => {
     const response: NormalRoomUserCountGetResponse = await handleNormalRoomUserCountGet(getSocketDataRoomNumber(socket));
     socket.emit('normal.room.user.count.got', JSON.stringify(response));
+  });
+}
+
+export function onNormalRoomStarterChange(
+  _socketServer: SocketServer,
+  socket: Socket
+): void {
+  registerSocketEvent(socket, 'normal.room.starter.change', async (req: any): Promise<void> => {
+    const request: NormalRoomStarterChangeRequest = safeParseJSON(req);
+    await handleNormalRoomStarterChange(getSocketDataRoomNumber(socket), request);
+    socket.emit('normal.room.starter.changed', JSON.stringify(request));
   });
 }

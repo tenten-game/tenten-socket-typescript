@@ -6,7 +6,7 @@ import { getRoom, setRoom } from "../../repository/common/room.repository";
 import { addUserToRoom, batchUpdateUserTeams, getTotalAndTeamUserCount, getUserList, updateUserIconFromRoom, updateUserTeamFromRoom } from "../../repository/common/user.repository";
 import { validateIfRequesterIsRoomMaster } from "../common/validation.service";
 import { NormalRoomCreateRequest, NormalRoomEnterRequest, NormalRoomModeChangeRequest } from "./dto/request";
-import { NormalRoomEnterResponse, NormalRoomUserCountGetResponse, NormalRoomUserIconChangeResponse, NormalRoomUserListGetResponse, NormalRoomUserTeamChangeResponse, NormalRoomUserTeamShuffleResponse } from "./dto/response";
+import { NormalRoomEnterResponse, NormalRoomStarterChangeRequest, NormalRoomUserCountGetResponse, NormalRoomUserIconChangeResponse, NormalRoomUserListGetResponse, NormalRoomUserTeamChangeResponse, NormalRoomUserTeamShuffleResponse } from "./dto/response";
 
 export async function handleNormalRoomCreate(request: NormalRoomCreateRequest, hostSocketId: string): Promise<void> {
     const user = request.user;
@@ -93,4 +93,13 @@ export async function handleNormalRoomUserTeamShuffle(
     return new NormalRoomUserTeamShuffleResponse(
         Object.values(userList)
     );
+}
+
+export async function handleNormalRoomStarterChange(
+    roomNumber: string,
+    request: NormalRoomStarterChangeRequest,
+): Promise<void> {
+    const room = await getRoom(roomNumber);
+    room.starter = request.newStarter;
+    await setRoom(roomNumber, room);
 }

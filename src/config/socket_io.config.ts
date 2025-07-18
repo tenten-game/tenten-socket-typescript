@@ -8,7 +8,7 @@ import { onLobbyResetUserList, onLobbyStartGame, onLobbyUserCountGet, onLobbyUse
 import { onEventRoomChangeMode, onEventRoomCreate, onEventRoomEnter, onEventRoomHostReEnter } from '../presentation/event/event.room.controller';
 import { onNormalFinishExit, onNormalFinishScorePost } from '../presentation/normal/normal.finish.controller';
 import { onNormalBypass, onNormalInGame6030Do, onNormalInGame6040Do, onNormalInGame6040Finish } from '../presentation/normal/normal.ingame.controller';
-import { onNormalRoomCreate, onNormalRoomEnter, onNormalRoomGameStart, onNormalRoomLeave, onNormalRoomModeChange, onNormalRoomReenter, onNormalRoomUserCountGet, onNormalRoomUserIconChange, onNormalRoomUserListGet, onNormalRoomUserTeamChange, onNormalRoomUserTeamShuffle } from '../presentation/normal/normal.room.controller';
+import { onNormalRoomCreate, onNormalRoomEnter, onNormalRoomGameStart, onNormalRoomLeave, onNormalRoomModeChange, onNormalRoomReenter, onNormalRoomStarterChange, onNormalRoomUserCountGet, onNormalRoomUserIconChange, onNormalRoomUserListGet, onNormalRoomUserTeamChange, onNormalRoomUserTeamShuffle } from '../presentation/normal/normal.room.controller';
 import { config } from './env.config';
 import { redisAdapter } from "./redis.config";
 
@@ -84,6 +84,8 @@ export function initializeSocket(socketServer: SocketServer): void {
 
     onNormalRoomUserListGet(socketServer, socket); // 방 유저 리스트 가져오기 - normal.room.user.list.get // normal.room.user.list.got
     onNormalRoomUserCountGet(socketServer, socket); // 방 유저 수 가져오기 - normal.room.user.count.get // normal.room.user.count.got
+
+    onNormalRoomStarterChange(socketServer, socket); // 방 유저 수 가져오기 - normal.room.starter.change // normal.room.starter.changed
 
     // NORMAL - IN-GAME
     onNormalBypass(socketServer, socket);

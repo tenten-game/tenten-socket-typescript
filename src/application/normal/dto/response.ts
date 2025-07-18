@@ -92,3 +92,9 @@ export class NormalFinishScorePostResponse {
         public score: number,
     ) { }
 }
+
+export class NormalRoomStarterChangeRequest {
+    constructor(
+        public newStarter: number,
+    ) { }
+}
